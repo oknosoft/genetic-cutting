@@ -1,2 +1,2 @@
 # genetic-cutting
-cutting optimization library: 1d, 1.5d 2d
+cutting optimization library:  linear 1d, semi-infinite strip 1.5d, sheet 2d, pyramid
