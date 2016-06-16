@@ -6,26 +6,23 @@
 
 (function () {
 
-	var Genetic = Genetic || require('./genetic');
+	//var Genetic = Genetic || require('./genetic');
 
 
 	function Cutting(engine) {
 
 		this.engine = new Cutting[engine];
 
-		Object.defineProperties(this, {
+		this.genetic = Genetic.create();
+		this.genetic.optimize = Genetic.Optimize.Minimize;
+		this.genetic.select1 = Genetic.Select1.Tournament2;
+		this.genetic.select2 = Genetic.Select2.Tournament2;
 
-			workpieces: {
-				get: this.engine.workpieces,
-				set: this.engine.workpieces
-			},
-
-			products: {
-				get: this.engine.products,
-				set: this.engine.products
-			}
-
-		});
+		this.genetic.seed = this.engine.seed;
+		this.genetic.mutate = this.engine.mutate;
+		this.genetic.crossover = this.engine.crossover;
+		this.genetic.fitness = this.engine.fitness;
+		this.genetic.generation = this.engine.generation;
 
 	}
 
@@ -35,42 +32,13 @@
 	 */
 	Cutting["1D"] = function C1D() {
 
-		var workpieces, // заготовки - массив длин
-			products,   // изделия - массив длин
-			decision;   // решение - массив номеров заготовок в порядке изделий
-
-		/**
-		 * Заготовки - хлысты
-		 * @param v {String|Array}
-		 * @return {Int32Array}
+		/*
+		 this.userData: {
+			 workpieces, // заготовки - массив длин
+			 products,   // изделия - массив длин
+			 decision;   // решение - массив номеров заготовок в порядке изделий
+		 }
 		 */
-		this.workpieces = function (v) {
-
-			if(typeof v == "string")
-				workpieces = new Int32Array(v.split(","));
-
-			else if(Array.isArray(v))
-				workpieces = new Int32Array(v);
-
-
-			return workpieces;
-		};
-
-		/**
-		 * Изделия - отрезки
-		 * @param v {String|Array}
-		 * @return {Int32Array}
-		 */
-		this.products = function (v) {
-
-			if(typeof v == "string")
-				products = new Int32Array(v.split(","));
-
-			else if(Array.isArray(v))
-				products = new Int32Array(v);
-
-			return products;
-		};
 
 
 		/**
@@ -79,7 +47,7 @@
 		 */
 		this.seed = function() {
 
-			var len = workpieces.length,
+			var len = this.userData.products.length,
 				decision = new Int16Array(len).fill(-1),
 				ind, i2;
 
@@ -134,10 +102,9 @@
 			// single-point crossover
 			var len = mother.length,
 				ca = Math.floor(Math.random()*len),
-				buffer = new ArrayBuffer(len * 3),
-				son = new Int16Array(buffer, 0, len).fill(-1),
-				daughter = new Int16Array(buffer, len, len).fill(-1),
-				tmp = new Int16Array(buffer, len * 2, len),
+				son = new Int16Array(len).fill(-1),
+				daughter = new Int16Array(len).fill(-1),
+				tmp = new Int16Array(len),
 				tmp_len, i;
 
 
@@ -177,9 +144,73 @@
 				}
 			}
 
-			buffer = tmp = null;
-
 			return [son, daughter];
+		};
+
+		/**
+		 * Осуществляет укладку заготовок и оценку решения
+		 * @param entity {Int16Array}
+		 * @return {number}
+		 */
+		this.fitness = function(entity) {
+
+			var fitness = 0,
+				len = entity.length,
+				res = new Int16Array(len),
+				products = this.userData.products,
+				workpieces = this.userData.workpieces,
+				lengths = Array.from(workpieces),
+				scraps = lengths.length,
+				workpiece_index, scrap_len, min_len, i;
+
+			for (i=0; i<entity.length; ++i) {
+
+				min_len = Infinity;
+				workpiece_index = -1;
+
+				lengths.some(function (val, index) {
+
+					scrap_len = val - products[entity[i]];
+					if(scrap_len > 0 && scrap_len < min_len){
+						min_len = scrap_len;
+						workpiece_index = index;
+
+						if(min_len == 0)
+							return true;
+					}
+				});
+
+				if(workpiece_index >=0){
+					lengths[workpiece_index] = min_len;
+					res[i] = workpiece_index;
+
+				}else{
+					lengths.push(6000 - products[entity[i]]);
+					res[i] = lengths.length - 1;
+
+				}
+			}
+
+			lengths.forEach(function (val, index) {
+				fitness += 10e12;
+				// if(index < scraps)
+				// 	fitness -= workpieces[index];
+				fitness -= val * val;
+			});
+
+			return fitness;
+		};
+
+		/**
+		 * Принимает решение о целесообразности дальнейшей эволюции
+		 * @param pop
+		 * @param generation
+		 * @param stats
+		 * @return {boolean}
+		 */
+		this.generation = function(pop, generation, stats) {
+			// stop running once we've reached the solution
+			return true;
 		};
 
 	};
