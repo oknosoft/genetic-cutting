@@ -131,77 +131,53 @@
 		 */
 		this.crossover = function(mother, father) {
 
-			// two-point crossover
+			// single-point crossover
 			var len = mother.length,
 				ca = Math.floor(Math.random()*len),
-				cb = Math.floor(Math.random()*len),
-				son = new Int16Array(len).fill(-1),
-				daughter = new Int16Array(len).fill(-1),
-				i, val, index;
+				buffer = new ArrayBuffer(len * 3),
+				son = new Int16Array(buffer, 0, len).fill(-1),
+				daughter = new Int16Array(buffer, len, len).fill(-1),
+				tmp = new Int16Array(buffer, len * 2, len),
+				tmp_len, i;
 
-			if (ca > cb) {
-				var tmp = cb;
-				cb = ca;
-				ca = tmp;
-			}
 
-			// начальные кусочки от родителей завполняем без хитростей
+			// начальные кусочки от родителей заполняем без хитростей, но запоминаем индексы второго родителя
+			tmp.fill(-1);
+			tmp_len = 0;
 			for(i=0; i<ca; i++){
 				son[i] = father[i];
+
+				tmp[tmp_len] = mother.indexOf(son[i]);
+				tmp_len++;
+			}
+
+			tmp_len = ca;
+			for(i=0; i<len; i++){
+				if(tmp.indexOf(i) == -1){
+					son[tmp_len] = mother[i];
+					tmp_len++;
+				}
+			}
+
+
+			tmp.fill(-1);
+			tmp_len = 0;
+			for(i=0; i<ca; i++){
 				daughter[i] = mother[i];
+
+				tmp[tmp_len] = father.indexOf(daughter[i]);
+				tmp_len++;
 			}
 
-			for(i=ca0; i<cb; i++){
-
-				// текущее значение от другого родителя
-				val = mother[i];
-				index = father.indexOf(val);
-
-				// если место кусочка у родителей совпадает, возвращаем текущее значение от другого родителя
-				if(index >= ca && index < cb){
-					son[i] = father[i];
-				}else{
-					son[i] = father[i];
-				}
-
-				// текущее значение от другого родителя
-				val = father[i];
-				index = mother.indexOf(val);
-
-				// если место кусочка у родителей совпадает, возвращаем текущее значение от другого родителя
-				if(index >= ca && index < cb){
-					daughter[i] = mother[i];
-				}else{
-					daughter[i] = mother[i];
+			tmp_len = ca;
+			for(i=0; i<len; i++){
+				if(tmp.indexOf(i) == -1){
+					daughter[tmp_len] = father[i];
+					tmp_len++;
 				}
 			}
 
-
-			var son = father.map(function (val, index) {
-
-
-				if(index < ca)
-					return val;
-
-
-				var mval = mother[index],
-					find = father.indexOf(mval);
-
-				// если место кусочка у родителей совпадает, возвращаем текущее значение от другого родителя
-				if(find >= ca && find < cb)
-					return mval;
-
-
-
-			});
-
-			var daughter = mother.map(function (val, index) {
-				if(index < ca)
-					return val;
-			});
-			
-			var son = father.subarray(0,ca) + mother.subarray(ca, cb-ca) + father.subarray(cb);
-			var daughter = mother.subarray(0,ca) + father.subarray(ca, cb-ca) + mother.subarray(cb);
+			buffer = tmp = null;
 
 			return [son, daughter];
 		};
