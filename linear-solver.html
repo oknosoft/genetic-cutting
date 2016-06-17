@@ -81,15 +81,22 @@
 976
 586
 976</textarea></td>
-        <td><textarea id="workpieces" style="width: 100px; height: 300px;">3307
+    <td><textarea id="workpieces" style="width: 100px; height: 300px;">3307
 3279
 1438
 4105
 5271</textarea></td>
-        <td><textarea id="params" style="width: 200px; height: 300px;">knifewidth 4
+    <td><textarea id="params" style="width: 200px; height: 300px;">knifewidth 4
 sticklength 6000
 wrongsnipmin 0
-wrongsnipmax 0</textarea></td>
+wrongsnipmax 0
+usefulscrap 600
+iterations 6000
+size 300
+crossover 0.4
+mutation 0.4
+skip 40
+webWorkers 1</textarea></td>
     </tr>
     </tbody>
 </table>
@@ -101,9 +108,9 @@ wrongsnipmax 0</textarea></td>
 <table id="results">
 	<thead>
 		<tr>
-			<th>Generation</th>
-			<th>Fitness</th>
-			<th>Solution</th>
+			<th style="width: 100px;">Generation</th>
+			<th style="width: 100px;">Fitness</th>
+			<th style="width: 200px;">Solution</th>
 		</tr>
 	</thead>
 	<tbody style="font-family: monospace;">
@@ -114,6 +121,30 @@ wrongsnipmax 0</textarea></td>
 
 var cutting = new Genetic.Cutting("1D");
 
+cutting.genetic.notification = function(pop, generation, stats, isFinished) {
+
+    if (generation == 0)
+        return;
+
+    var decision = this.fitness(pop[0].entity, true);
+
+    if(this.last == decision.scraps_percent){
+        var row = $("#results tbody tr")[0];
+        row.cells[0].innerHTML = generation;
+        return;
+    }
+
+    this.last = decision.scraps_percent;
+
+    var buf = "";
+    buf += "<tr>";
+    buf += "<td>" + generation + "</td>";
+    buf += "<td>" + (pop[0].fitness / 10e9).toPrecision(5) + "</td>";
+    buf += "<td>" + decision.scraps_percent.toPrecision(3) + "</td>";
+    buf += "</tr>";
+    $("#results tbody").prepend(buf);
+};
+
 
 $(document).ready(function () {
 	$("#solve").click(function () {
@@ -121,18 +152,35 @@ $(document).ready(function () {
 		$("#results tbody").html("");
 		
 		var config = {
-			"iterations": 9000
-			, "size": 300
-			, "crossover": 0.3
-			, "mutation": 0.3
-			, "skip": 60
-            , "webWorkers": false
+			iterations: 3000,
+            size: 300,
+            crossover: 0.3,
+            mutation: 0.3,
+            skip: 60,
+            webWorkers: true
 		};
 
         var userData = {
             products: $("#products").val().split("\n").map(function(v){return parseInt(v)}),
-            workpieces: $("#workpieces").val().split("\n").map(function(v){return parseInt(v)})
+            workpieces: $("#workpieces").val().split("\n").map(function(v){return parseInt(v)}),
+            knifewidth: 4,
+            sticklength: 6000,
+            wrongsnipmin: 0,
+            wrongsnipmax: 0,
+            usefulscrap: 600
         };
+
+        $("#params").val().split("\n").forEach(function (v) {
+
+            var prm = v.split(" ");
+
+            if(config.hasOwnProperty(prm[0]))
+                config[prm[0]] = parseFloat(prm[1]);
+
+            else if(userData.hasOwnProperty(prm[0]))
+                userData[prm[0]] = parseFloat(prm[1]);
+        });
+
 
         cutting.genetic.evolve(config, userData);
 	});

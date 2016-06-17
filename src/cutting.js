@@ -152,15 +152,14 @@
 		 * @param entity {Int16Array}
 		 * @return {number}
 		 */
-		this.fitness = function(entity) {
+		this.fitness = function(entity, decision) {
 
 			var fitness = 0,
 				len = entity.length,
 				res = new Int16Array(len),
-				products = this.userData.products,
-				workpieces = this.userData.workpieces,
-				lengths = Array.from(workpieces),
-				scraps = lengths.length,
+				userData = this.userData,
+				workpieces = Array.from(userData.workpieces),
+				scraps = workpieces.length,
 				workpiece_index, scrap_len, min_len, i;
 
 			for (i=0; i<entity.length; ++i) {
@@ -168,10 +167,16 @@
 				min_len = Infinity;
 				workpiece_index = -1;
 
-				lengths.some(function (val, index) {
+				workpieces.some(function (val, index) {
 
-					scrap_len = val - products[entity[i]];
-					if(scrap_len > 0 && scrap_len < min_len){
+					scrap_len = val - userData.products[entity[i]] - userData.knifewidth;
+					
+					if(scrap_len >= 0 && scrap_len < min_len){
+
+						if(scrap_len > userData.wrongsnipmin && userData.wrongsnipmax && scrap_len < userData.wrongsnipmax){
+							return;
+						}
+						
 						min_len = scrap_len;
 						workpiece_index = index;
 
@@ -181,22 +186,48 @@
 				});
 
 				if(workpiece_index >=0){
-					lengths[workpiece_index] = min_len;
+					workpieces[workpiece_index] = min_len;
 					res[i] = workpiece_index;
 
 				}else{
-					lengths.push(6000 - products[entity[i]]);
-					res[i] = lengths.length - 1;
+					workpieces.push(userData.sticklength - userData.products[entity[i]]);
+					res[i] = workpieces.length - 1;
 
 				}
 			}
 
-			lengths.forEach(function (val, index) {
-				fitness += 10e12;
-				// if(index < scraps)
-				// 	fitness -= workpieces[index];
-				fitness -= val * val;
-			});
+
+			if(!decision){
+				workpieces.forEach(function (val, index) {
+					fitness += 10e12;
+					// форсируем использование обрези, уменьшая её цену
+					if(index < scraps)
+						fitness -= 10000;
+					fitness -= val * val;
+				});
+
+			}else{
+				fitness = {
+					workpieces: workpieces,
+					res: res,
+					workpieces_len: 0,
+					products_len: userData.products.reduce(function(a, b) { return a + b; }, 0),
+					scraps_len: 0
+				};
+
+				workpieces.forEach(function (val, index) {
+
+					if(index < scraps)
+						fitness.workpieces_len += userData.workpieces[index];
+					else
+						fitness.workpieces_len += userData.sticklength;
+
+					if(val >= userData.usefulscrap)
+						fitness.scraps_len += val;
+				});
+
+				fitness.scraps_percent = (fitness.workpieces_len - fitness.products_len - fitness.scraps_len) * 100 / fitness.workpieces_len;
+			}
 
 			return fitness;
 		};
