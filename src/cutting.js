@@ -16,7 +16,7 @@
 		this.genetic = Genetic.create();
 		this.genetic.optimize = Genetic.Optimize.Minimize;
 		this.genetic.select1 = Genetic.Select1.Tournament2;
-		this.genetic.select2 = Genetic.Select2.Tournament3;
+		this.genetic.select2 = Genetic.Select2.Tournament2;
 
 		this.genetic.seed = this.engine.seed;
 		this.genetic.mutate = this.engine.mutate;

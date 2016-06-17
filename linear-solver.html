@@ -95,10 +95,11 @@ sticklength 6000
 wrongsnipmin 0
 wrongsnipmax 0
 usefulscrap 600
-iterations 4000
+iterations 10000
 size 100
-crossover 0.1
+crossover 0.2
 mutation 0.3
+random 0.1
 skip 40
 webWorkers 1</textarea></td>
     </tr>
@@ -157,7 +158,7 @@ $(document).ready(function () {
 		
 		var config = {
 			iterations: 3000,
-            size: 300,
+            size: 200,
             crossover: 0.3,
             mutation: 0.3,
             skip: 60,
