@@ -21,80 +21,84 @@
     </thead>
     <tbody style="font-family: monospace;">
     <tr>
-        <td><textarea id="products" style="width: 100px; height: 300px;">491
-1546
-491
-1546
-491
-1546
-491
-1546
-491
-1546
-506
-516
-838
-1666
-838
-1666
-838
-1666
-838
-1666
-838
-1666
-838
-1666
-863
-1666
-863
-1666
-863
-1666
-531
-1666
-531
-1666
-863
-1666
-863
-1666
-863
-1666
-838
-1666
-838
-1666
-838
-1666
-838
-1666
-838
-1666
-838
-1666
-531
-1666
-531
-1666
+        <td><textarea id="products" style="width: 100px; height: 300px;">1356
+1436
+646
+2266
+1086
+1626
+1086
+1626
+1086
+1626
+1086
+1626
+1086
+1626
 586
-976
+1626
 586
-976</textarea></td>
-    <td><textarea id="workpieces" style="width: 100px; height: 300px;">3307
-3279
-1438
-4105
-5271</textarea></td>
+1626
+1746
+2666
+1746
+2666
+1746
+2666
+1746
+2666
+1746
+2666
+1746
+2666
+1166
+1746
+1166
+1746
+1746
+2666
+1746
+2666
+1746
+2666
+1746
+2666
+1746
+2666
+1746
+2666
+1166
+1746
+1166
+1746
+666
+1056
+666
+1056
+666
+1056
+666
+1056
+666
+1056
+666
+1056
+646
+1076</textarea></td>
+    <td><textarea id="workpieces" style="width: 100px; height: 300px;">2058
+1920
+4768
+1211
+1711</textarea></td>
     <td><textarea id="params" style="width: 200px; height: 300px;">knifewidth 4
 sticklength 6000
 wrongsnipmin 0
 wrongsnipmax 0
 usefulscrap 600
-iterations 6000
-size 300
-crossover 0.4
-mutation 0.4
+iterations 4000
+size 100
+crossover 0.1
+mutation 0.3
 skip 40
 webWorkers 1</textarea></td>
     </tr>
@@ -109,8 +113,8 @@ webWorkers 1</textarea></td>
 	<thead>
 		<tr>
 			<th style="width: 100px;">Generation</th>
-			<th style="width: 100px;">Fitness</th>
-			<th style="width: 200px;">Solution</th>
+			<th style="width: 200px;">Fitness</th>
+			<th style="width: 100px;">Solution</th>
 		</tr>
 	</thead>
 	<tbody style="font-family: monospace;">
@@ -139,8 +143,8 @@ cutting.genetic.notification = function(pop, generation, stats, isFinished) {
     var buf = "";
     buf += "<tr>";
     buf += "<td>" + generation + "</td>";
-    buf += "<td>" + (pop[0].fitness / 10e9).toPrecision(5) + "</td>";
-    buf += "<td>" + decision.scraps_percent.toPrecision(3) + "</td>";
+    buf += "<td align='center'>" + (pop[0].fitness / 10e8).toFixed(5) + " " + decision.workpieces.length + "</td>";
+    buf += "<td>" + decision.scraps_percent.toFixed(3) + "</td>";
     buf += "</tr>";
     $("#results tbody").prepend(buf);
 };
