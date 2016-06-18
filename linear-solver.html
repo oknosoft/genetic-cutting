@@ -9,7 +9,7 @@
     <script src="lib/paper-core.js"></script>
     <script src="src/visualization.js"></script>
 
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="lib/jquery-2.2.4.min.js"></script>
 
     <script src="lib/progressbar.js"></script>
 
@@ -23,7 +23,7 @@
 
 <h1>Linear cut genetic optimizer</h1>
 
-<div id="layout" style="min-height: 360px"></div>
+<div id="layout" style="min-height: 420px"></div>
 
 <script>
 
@@ -40,20 +40,20 @@
                 title: 'Исходные данные',
                 tooltip: 'Размеры изделий и заготовок',
                 componentState: { label: 'A' },
+                width: 20
+            },{
+                type: 'component',
+                componentName: 'results',
+                title: 'Оптимизация',
+                tooltip: 'Запуск и ход оптимизации',
+                componentState: { label: 'B' },
                 width: 30
             },{
-                type: 'column',
-                content:[{
-                    type: 'component',
-                    componentName: 'results',
-                    title: 'Оптимизация',
-                    tooltip: 'Запуск и ход оптимизации',
-                    componentState: { label: 'B' }
-                },{
-                    type: 'component',
-                    componentName: 'testComponent',
-                    componentState: { label: 'C' }
-                }]
+                type: 'component',
+                componentName: 'visualization',
+                title: 'Визуализация',
+                tooltip: 'Расположение изделий на заготовках',
+                componentState: { label: 'C' }
             }]
         }]
     };
@@ -65,30 +65,39 @@
         tab.element.attr('title', tab.contentItem.config.tooltip);
     });
 
-    myLayout.registerComponent( 'testComponent', function( container, componentState ){
-        container.getElement().html( '<h2>' + componentState.label + '</h2>' );
+    myLayout.registerComponent( 'visualization', function( container, componentState ){
+        //container.getElement().html( '<div id="scheme"></div>' );
+        visualization = new Genetic.Visualization("1D", container.getElement()[0]);
+
+        container.on('resize', function () {
+            container.width;
+            visualization.resize_canvas();
+        });
+
     });
 
     myLayout.registerComponent( 'results', function( container, componentState ){
         container.getElement().html( '<table id="results" style="width: 100%; background-color: whitesmoke"><thead><tr>\
-        <th style="text-align: left"><button id="solve" style="font-weight: bold; padding: 2px 12px; margin: 0px 20px;">Старт</button></th>\
+        <th width="30%" style="text-align: left"><button id="solve" style="font-weight: bold; padding: 2px 12px; margin: 0px 20px;">Старт</button></th>\
                 <th>Поколение</th><th>Качество</th><th>% Обрези</th></tr></thead><tbody style="font-family: monospace;"></tbody></table>' );
     });
 
     myLayout.registerComponent( 'input', function( container, componentState ){
-        container.getElement().html( '<table style="width: 100%"><thead><tr><th>Изделия</th><th>Заготовки</th><th>Параметры</th></tr></thead>   \
+        container.getElement().html( '<table style="width: 100%; background-color: whitesmoke"><thead><tr><th>Изделия</th><th>Заготовки</th><th>Параметры</th></tr></thead>   \
             <tbody style="font-family: monospace;"><tr><td style="width: 25%;">\
-            <textarea id="products" style="width: 100%; height: 300px; background-color: whitesmoke">1356\n1436\n646\n2266\n1086\n1626\n1086\n1626\n1086\n1626\n1086\n1626\n\
+            <textarea id="products" style="width: 100%; height: 360px; background-color: whitesmoke">1356\n1436\n646\n2266\n1086\n1626\n1086\n1626\n1086\n1626\n1086\n1626\n\
 1086\n1626\n586\n1626\n586\n1626\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1166\n1746\n1166\n1746\n1746\n\
 2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1166\n1746\n1166\n1746\n666\n1056\n666\n1056\n666\n1056\n666\n1056\n\
 666\n1056\n666\n1056\n646\n1076</textarea></td><td style="width: 25%;">\
-        <textarea id="workpieces" style="width: 100%; height: 300px; background-color: whitesmoke">2058\n1920\n4768\n1211\n1711</textarea></td><td>\
-        <textarea id="params" style="width: 100%; height: 300px; background-color: whitesmoke">knifewidth 4\nsticklength 6000\nwrongsnipmin 0\nwrongsnipmax 0\n\
-usefulscrap 600\novermeasure 0\niterations 10000\nsize 120\ncrossover 0.2\nmutation 0.3\nrandom 0.1\nskip 40\nwebWorkers 1</textarea></td></tr></tbody></table>' );
+        <textarea id="workpieces" style="width: 100%; height: 360px; background-color: whitesmoke">2058\n1920\n4768\n1211\n1711</textarea></td><td>\
+        <textarea id="params" style="width: 100%; height: 360px; background-color: whitesmoke">knifewidth 4\nsticklength 6000\nwrongsnipmin 0\nwrongsnipmax 0\n\
+usefulscrap 600\novermeasure 0\niterations 10000\nsize 120\ncrossover 0.2\nmutation 0.3\nrandom 0.1\nskip 50\nwebWorkers 1</textarea></td></tr></tbody></table>' );
     });
 
     myLayout.init();
 
+
+    var visualization;
 
     var cutting = new Genetic.Cutting("1D");
 
@@ -102,11 +111,16 @@ usefulscrap 600\novermeasure 0\niterations 10000\nsize 120\ncrossover 0.2\nmutat
         if(isFinished){
             $("#solve").prop( "disabled", false );
             if(this.progressbar){
-                row = $("#results tbody tr")[0];
+                setTimeout(function () {
+                    this.destroy()
+                }.bind(this.progressbar), 1000);
+                delete this.progressbar;
             }
         }
 
-
+        if(this.progressbar){
+            this.progressbar.animate(generation / this.configuration.iterations);
+        }
 
         if(this.last == decision.scraps_percent){
             row = $("#results tbody tr")[0];
@@ -116,6 +130,8 @@ usefulscrap 600\novermeasure 0\niterations 10000\nsize 120\ncrossover 0.2\nmutat
 
         this.last = decision.scraps_percent;
 
+        visualization.draw(this.userData, decision);
+
         var buf = "";
         buf += "<tr><td></td>";
         buf += "<td align='center'>" + generation + "</td>";
@@ -124,14 +140,21 @@ usefulscrap 600\novermeasure 0\niterations 10000\nsize 120\ncrossover 0.2\nmutat
         buf += "</tr>";
         $("#results tbody").prepend(buf);
 
-        if(!this.progressbar){
-            row = $("#results tbody tr")[0];
-            row.cells[0].innerHTML = "<div style='margin: 0px; width: 100%; height: 20px; position: relative;'></div>";
+        row = $("#results tbody tr")[0];
 
+        if(this.progressbar){
+            if(this.progressbar._container.parentElement != row.cells[0]){
+                this.progressbar._container.parentElement.removeChild(this.progressbar._container);
+                row.cells[0].appendChild(this.progressbar._container);
+            }
+
+
+        }else{
+            row.cells[0].innerHTML = "<div style='margin: 0px; width: 100%; height: 20px; position: relative;'></div>";
             this.progressbar = new ProgressBar.Line(row.cells[0].firstChild, {
                         strokeWidth: 1,
                         easing: 'easeInOut',
-                        duration: 1400,
+                        duration: 200,
                         color: '#ddd',
                         trailColor: '#eee',
                         trailWidth: 1,
@@ -156,7 +179,6 @@ usefulscrap 600\novermeasure 0\niterations 10000\nsize 120\ncrossover 0.2\nmutat
                             bar.setText(Math.round(bar.value() * 100) + ' %');
                         }
             });
-            this.progressbar.animate(0.9);
         }
     };
 
