@@ -16,14 +16,14 @@
 		this.scope = new paper.constructor();
 		this.scheme = new paper.Project(this.canvas);
 
-		this.engine = new Visualization[engine];
+		this.engine = new Visualization[engine](this);
 
-		this.resize_canvas = function(){
+		this.scheme.resize_canvas = function(){
 
-			this.scheme.view.viewSize.width = element.offsetWidth;
-			this.scheme.view.viewSize.height = element.offsetHeight;
+			this.view.viewSize.width = element.offsetWidth;
+			this.view.viewSize.height = element.offsetHeight;
 
-			this.scheme.zoom_fit();
+			this.zoom_fit();
 		};
 
 		this.scheme.zoom_fit = function () {
@@ -40,6 +40,22 @@
 		this.draw = function (userData, decision) {
 
 			this.scheme.clear();
+
+			this.engine.draw(userData, decision);
+
+			this.scheme.zoom_fit();
+			this.scheme.view.update();
+		};
+		
+	}
+
+	/**
+	 * Визуализация линейного раскроя
+	 * @constructor
+	 */
+	Visualization["1D"] = function V1D(visualization) {
+
+		this.draw = function (userData, decision) {
 
 			var x=0, y, w, h=88,
 				path;
@@ -61,19 +77,33 @@
 					closed: true
 				});
 
+				var res = [];
+				decision.res.forEach(function (val, index) {
+					if(val == i){
+						res.push(userData.products[index]);
+					}
+				});
+				res.sort(function (a,b) {
+					return b-a
+				});
+				res.reduce(function (sum, curr) {
+					new paper.Path({
+						segments: [[x+sum+h/2, y+4], [x+sum+curr-h/2, y+4], [x+sum+curr, y+h-4], [x+sum, y+h-4]],
+						fillColor: new paper.Color(Math.random() * 0.2 + 0.7, Math.random() * 0.3 + 0.6, Math.random() * 0.2 + 0.7),
+						closed: true
+					});
+					new paper.PointText({
+						point: [x+sum+curr/2, y+24+h/2],
+						content: curr,
+						fillColor: 'black',
+						justification: 'center',
+						fontSize: 72
+					});
+					return sum + curr + userData.knifewidth;
+				}, 0);
+
 			}
-
-			this.scheme.zoom_fit();
-			this.scheme.view.update();
 		};
-		
-	}
-
-	/**
-	 * Визуализация линейного раскроя
-	 * @constructor
-	 */
-	Visualization["1D"] = function V1D() {
 
 	};
 
@@ -83,6 +113,9 @@
 	 */
 	Visualization["2D"] = function V1D() {
 
+		this.draw = function (userData, decision) {
+
+		}
 	};
 
 	/**
@@ -90,6 +123,10 @@
 	 * @constructor
 	 */
 	Visualization["Pyramid"] = function VPyramid() {
+
+		this.draw = function (userData, decision) {
+
+		}
 
 	};
 

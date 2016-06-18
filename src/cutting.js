@@ -153,11 +153,14 @@
 
 			var fitness = 0,
 				len = entity.length,
-				res = new Int16Array(len),
+				res,
 				userData = this.userData,
 				workpieces = Array.from(userData.workpieces),
 				scraps = workpieces.length,
 				workpiece_index, scrap_len, min_len, i;
+
+			if(decision)
+				res = new Int16Array(len);
 
 			for (i=0; i<entity.length; ++i) {
 
@@ -192,11 +195,13 @@
 				// если найдено - укладываем, иначе - добавляем палку
 				if(workpiece_index >=0){
 					workpieces[workpiece_index] = min_len;
-					res[i] = workpiece_index;
+					if(decision)
+						res[entity[i]] = workpiece_index;
 
 				}else{
 					workpieces.push(userData.sticklength - userData.products[entity[i]] - userData.overmeasure);
-					res[i] = workpieces.length - 1;
+					if(decision)
+						res[entity[i]] = workpieces.length - 1;
 
 				}
 			}
@@ -207,8 +212,8 @@
 				workpieces.forEach(function (val, index) {
 					fitness += 10e12;
 					// форсируем использование обрези, уменьшая её цену
-					if(index < scraps)
-						fitness -= 10000;
+					// if(index < scraps)
+					// 	fitness -= 10000;
 					fitness -= val * val;
 				});
 

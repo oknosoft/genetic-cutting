@@ -71,27 +71,29 @@
 
         container.on('resize', function () {
             container.width;
-            visualization.resize_canvas();
+            visualization.scheme.resize_canvas();
         });
 
     });
 
     myLayout.registerComponent( 'results', function( container, componentState ){
-        container.getElement().html( '<table id="results" style="width: 100%; background-color: whitesmoke"><thead><tr>\
+        container.getElement().html( '<table id="results" style="width: 100%; background-color: whitesmoke; font: 90% Arial,sans-serif;"><thead><tr>\
         <th width="30%" style="text-align: left"><button id="solve" style="font-weight: bold; padding: 2px 12px; margin: 0px 20px;">Старт</button></th>\
-                <th>Поколение</th><th>Качество</th><th>% Обрези</th></tr></thead><tbody style="font-family: monospace;"></tbody></table>' );
+                <th width="20%" style="font-weight: normal">Поколение</th><th width="30%" style="font-weight: normal">Качество</th>\
+                <th width="20%" style="font-weight: normal">% Обрези</th></tr></thead><tbody></tbody></table>' );
     });
 
     myLayout.registerComponent( 'input', function( container, componentState ){
-        container.getElement().html( '<table style="width: 100%; background-color: whitesmoke"><thead><tr><th>Изделия</th><th>Заготовки</th><th>Параметры</th></tr></thead>   \
-            <tbody style="font-family: monospace;"><tr><td style="width: 25%;">\
+        container.getElement().html('<table style="width: 100%; background-color: whitesmoke; font: 90% Arial,sans-serif;"><thead>\
+        <tr><th style="font-weight: normal">Изделия</th><th style="font-weight: normal">Заготовки</th>\
+        <th style="font-weight: normal">Параметры</th></tr></thead><tbody><tr><td style="width: 25%;">\
             <textarea id="products" style="width: 100%; height: 360px; background-color: whitesmoke">1356\n1436\n646\n2266\n1086\n1626\n1086\n1626\n1086\n1626\n1086\n1626\n\
 1086\n1626\n586\n1626\n586\n1626\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1166\n1746\n1166\n1746\n1746\n\
 2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1166\n1746\n1166\n1746\n666\n1056\n666\n1056\n666\n1056\n666\n1056\n\
 666\n1056\n666\n1056\n646\n1076</textarea></td><td style="width: 25%;">\
-        <textarea id="workpieces" style="width: 100%; height: 360px; background-color: whitesmoke">2058\n1920\n4768\n1211\n1711</textarea></td><td>\
+        <textarea id="workpieces" style="width: 100%; height: 360px; background-color: whitesmoke">1211\n1711\n1920\n2058\n4768</textarea></td><td>\
         <textarea id="params" style="width: 100%; height: 360px; background-color: whitesmoke">knifewidth 4\nsticklength 6000\nwrongsnipmin 0\nwrongsnipmax 0\n\
-usefulscrap 600\novermeasure 0\niterations 10000\nsize 120\ncrossover 0.2\nmutation 0.3\nrandom 0.1\nskip 50\nwebWorkers 1</textarea></td></tr></tbody></table>' );
+usefulscrap 600\novermeasure 0\niterations 12000\nsize 120\ncrossover 0.2\nmutation 0.25\nrandom 0.15\nskip 50\nwebWorkers 1</textarea></td></tr></tbody></table>' );
     });
 
     myLayout.init();
@@ -193,15 +195,16 @@ usefulscrap 600\novermeasure 0\niterations 10000\nsize 120\ncrossover 0.2\nmutat
             var config = {
                 iterations: 3000,
                 size: 200,
-                crossover: 0.3,
+                crossover: 0.2,
                 mutation: 0.3,
+                random: 0.1,
                 skip: 60,
                 webWorkers: true
             };
 
             var userData = {
-                products: $("#products").val().split("\n").map(function(v){return parseInt(v)}),
-                workpieces: $("#workpieces").val().split("\n").map(function(v){return parseInt(v)}),
+                products: [],
+                workpieces: [],
                 knifewidth: 4,
                 overmeasure: 0,
                 sticklength: 6000,
@@ -209,6 +212,18 @@ usefulscrap 600\novermeasure 0\niterations 10000\nsize 120\ncrossover 0.2\nmutat
                 wrongsnipmax: 0,
                 usefulscrap: 600
             };
+
+            $("#products").val().split("\n").forEach(function(v){
+                v = parseInt(v);
+                if(!isNaN(v) && v > 0)
+                    userData.products.push(v);
+            });
+
+            $("#workpieces").val().split("\n").forEach(function(v){
+                v = parseInt(v);
+                if(!isNaN(v) && v > 0)
+                    userData.workpieces.push(v);
+            });
 
             $("#params").val().split("\n").forEach(function (v) {
 
