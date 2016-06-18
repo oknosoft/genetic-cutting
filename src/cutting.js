@@ -6,9 +6,6 @@
 
 (function () {
 
-	//var Genetic = Genetic || require('./genetic');
-
-
 	function Cutting(engine) {
 
 		this.engine = new Cutting[engine];
@@ -167,10 +164,17 @@
 				min_len = Infinity;
 				workpiece_index = -1;
 
+				// бежим по заготовкам, ищем самую короткую, на которую можно уложить
 				workpieces.some(function (val, index) {
 
+					// получаем длину остатка
 					scrap_len = val - userData.products[entity[i]] - userData.knifewidth;
-					
+
+					// укорачиваем заготовку на припуск
+					if(index < scraps && userData.workpieces[index] == val && userData.overmeasure)
+						scrap_len -= userData.overmeasure;
+
+					// анализируем остаток
 					if(scrap_len >= 0 && scrap_len < min_len){
 
 						if(scrap_len > userData.wrongsnipmin && userData.wrongsnipmax && scrap_len < userData.wrongsnipmax){
@@ -185,18 +189,20 @@
 					}
 				});
 
+				// если найдено - укладываем, иначе - добавляем палку
 				if(workpiece_index >=0){
 					workpieces[workpiece_index] = min_len;
 					res[i] = workpiece_index;
 
 				}else{
-					workpieces.push(userData.sticklength - userData.products[entity[i]]);
+					workpieces.push(userData.sticklength - userData.products[entity[i]] - userData.overmeasure);
 					res[i] = workpieces.length - 1;
 
 				}
 			}
 
 
+			// в зависимости от признака decision, возвращаем оценку решения или полное решение
 			if(!decision){
 				workpieces.forEach(function (val, index) {
 					fitness += 10e12;
@@ -270,12 +276,12 @@
 	 * Движок укладки  в пирамиды
 	 * @constructor
 	 */
-	Cutting["Pyramid"] = function Pyramid() {
+	Cutting["Pyramid"] = function CPyramid() {
 
 	};
 
 	Genetic.Cutting = Cutting;
-
+	
 })();
 
 

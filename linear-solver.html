@@ -5,191 +5,204 @@
 	<title>Linear cut genetic optimizer</title>
 	<script src="lib/genetic.js"></script>
     <script src="src/cutting.js"></script>
+
+    <script src="lib/paper-core.js"></script>
+    <script src="src/visualization.js"></script>
+
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+    <script src="lib/progressbar.js"></script>
+
+    <script src="lib/golden-layout/goldenlayout.js"></script>
+
+    <link type="text/css" rel="stylesheet" href="lib/golden-layout/goldenlayout-base.css" />
+    <link type="text/css" rel="stylesheet" href="lib/golden-layout/goldenlayout-light-theme.css" />
+
 </head>
 <body>
 
 <h1>Linear cut genetic optimizer</h1>
 
-<table>
-    <thead>
-    <tr>
-        <th>Изделия</th>
-        <th>Заготовки</th>
-        <th>Параметры</th>
-    </tr>
-    </thead>
-    <tbody style="font-family: monospace;">
-    <tr>
-        <td><textarea id="products" style="width: 100px; height: 300px;">1356
-1436
-646
-2266
-1086
-1626
-1086
-1626
-1086
-1626
-1086
-1626
-1086
-1626
-586
-1626
-586
-1626
-1746
-2666
-1746
-2666
-1746
-2666
-1746
-2666
-1746
-2666
-1746
-2666
-1166
-1746
-1166
-1746
-1746
-2666
-1746
-2666
-1746
-2666
-1746
-2666
-1746
-2666
-1746
-2666
-1166
-1746
-1166
-1746
-666
-1056
-666
-1056
-666
-1056
-666
-1056
-666
-1056
-666
-1056
-646
-1076</textarea></td>
-    <td><textarea id="workpieces" style="width: 100px; height: 300px;">2058
-1920
-4768
-1211
-1711</textarea></td>
-    <td><textarea id="params" style="width: 200px; height: 300px;">knifewidth 4
-sticklength 6000
-wrongsnipmin 0
-wrongsnipmax 0
-usefulscrap 600
-iterations 10000
-size 120
-crossover 0.2
-mutation 0.3
-random 0.1
-skip 40
-webWorkers 1</textarea></td>
-    </tr>
-    </tbody>
-</table>
-
-
-
-<button id="solve">Solve</button>
-
-<table id="results">
-	<thead>
-		<tr>
-			<th style="width: 100px;">Generation</th>
-			<th style="width: 200px;">Fitness</th>
-			<th style="width: 100px;">Solution</th>
-		</tr>
-	</thead>
-	<tbody style="font-family: monospace;">
-	</tbody>
-</table>
+<div id="layout" style="min-height: 360px"></div>
 
 <script>
 
-var cutting = new Genetic.Cutting("1D");
+    var config = {
+        settings:{
+            showPopoutIcon: false,
+            showCloseIcon: false
+        },
+        content: [{
+            type: 'row',
+            content:[{
+                type: 'component',
+                componentName: 'input',
+                title: 'Исходные данные',
+                tooltip: 'Размеры изделий и заготовок',
+                componentState: { label: 'A' },
+                width: 30
+            },{
+                type: 'column',
+                content:[{
+                    type: 'component',
+                    componentName: 'results',
+                    title: 'Оптимизация',
+                    tooltip: 'Запуск и ход оптимизации',
+                    componentState: { label: 'B' }
+                },{
+                    type: 'component',
+                    componentName: 'testComponent',
+                    componentState: { label: 'C' }
+                }]
+            }]
+        }]
+    };
 
-cutting.genetic.notification = function(pop, generation, stats, isFinished) {
+    var myLayout = new GoldenLayout( config, document.querySelector("#layout") );
 
-    if (generation == 0)
-        return;
+    // подключаем всплывающие подсказки
+    myLayout.on( 'tabCreated', function( tab ){
+        tab.element.attr('title', tab.contentItem.config.tooltip);
+    });
 
-    var decision = this.fitness(pop[0].entity, true);
+    myLayout.registerComponent( 'testComponent', function( container, componentState ){
+        container.getElement().html( '<h2>' + componentState.label + '</h2>' );
+    });
 
-    if(this.last == decision.scraps_percent){
-        var row = $("#results tbody tr")[0];
-        row.cells[0].innerHTML = generation;
-        return;
-    }
+    myLayout.registerComponent( 'results', function( container, componentState ){
+        container.getElement().html( '<table id="results" style="width: 100%; background-color: whitesmoke"><thead><tr>\
+        <th style="text-align: left"><button id="solve" style="font-weight: bold; padding: 2px 12px; margin: 0px 20px;">Старт</button></th>\
+                <th>Поколение</th><th>Качество</th><th>% Обрези</th></tr></thead><tbody style="font-family: monospace;"></tbody></table>' );
+    });
 
-    this.last = decision.scraps_percent;
+    myLayout.registerComponent( 'input', function( container, componentState ){
+        container.getElement().html( '<table style="width: 100%"><thead><tr><th>Изделия</th><th>Заготовки</th><th>Параметры</th></tr></thead>   \
+            <tbody style="font-family: monospace;"><tr><td style="width: 25%;">\
+            <textarea id="products" style="width: 100%; height: 300px; background-color: whitesmoke">1356\n1436\n646\n2266\n1086\n1626\n1086\n1626\n1086\n1626\n1086\n1626\n\
+1086\n1626\n586\n1626\n586\n1626\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1166\n1746\n1166\n1746\n1746\n\
+2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1746\n2666\n1166\n1746\n1166\n1746\n666\n1056\n666\n1056\n666\n1056\n666\n1056\n\
+666\n1056\n666\n1056\n646\n1076</textarea></td><td style="width: 25%;">\
+        <textarea id="workpieces" style="width: 100%; height: 300px; background-color: whitesmoke">2058\n1920\n4768\n1211\n1711</textarea></td><td>\
+        <textarea id="params" style="width: 100%; height: 300px; background-color: whitesmoke">knifewidth 4\nsticklength 6000\nwrongsnipmin 0\nwrongsnipmax 0\n\
+usefulscrap 600\novermeasure 0\niterations 10000\nsize 120\ncrossover 0.2\nmutation 0.3\nrandom 0.1\nskip 40\nwebWorkers 1</textarea></td></tr></tbody></table>' );
+    });
 
-    var buf = "";
-    buf += "<tr>";
-    buf += "<td>" + generation + "</td>";
-    buf += "<td align='center'>" + (pop[0].fitness / 10e8).toFixed(5) + " " + decision.workpieces.length + "</td>";
-    buf += "<td>" + decision.scraps_percent.toFixed(3) + "</td>";
-    buf += "</tr>";
-    $("#results tbody").prepend(buf);
-};
+    myLayout.init();
 
 
-$(document).ready(function () {
-	$("#solve").click(function () {
-		
-		$("#results tbody").html("");
-		
-		var config = {
-			iterations: 3000,
-            size: 200,
-            crossover: 0.3,
-            mutation: 0.3,
-            skip: 60,
-            webWorkers: true
-		};
+    var cutting = new Genetic.Cutting("1D");
 
-        var userData = {
-            products: $("#products").val().split("\n").map(function(v){return parseInt(v)}),
-            workpieces: $("#workpieces").val().split("\n").map(function(v){return parseInt(v)}),
-            knifewidth: 4,
-            sticklength: 6000,
-            wrongsnipmin: 0,
-            wrongsnipmax: 0,
-            usefulscrap: 600
-        };
+    cutting.genetic.notification = function(pop, generation, stats, isFinished) {
 
-        $("#params").val().split("\n").forEach(function (v) {
+        if (generation == 0)
+            return;
 
-            var prm = v.split(" ");
+        var decision = this.fitness(pop[0].entity, true), row;
 
-            if(config.hasOwnProperty(prm[0]))
-                config[prm[0]] = parseFloat(prm[1]);
+        if(isFinished){
+            $("#solve").prop( "disabled", false );
+            if(this.progressbar){
+                row = $("#results tbody tr")[0];
+            }
+        }
 
-            else if(userData.hasOwnProperty(prm[0]))
-                userData[prm[0]] = parseFloat(prm[1]);
+
+
+        if(this.last == decision.scraps_percent){
+            row = $("#results tbody tr")[0];
+            row.cells[1].innerHTML = generation;
+            return;
+        }
+
+        this.last = decision.scraps_percent;
+
+        var buf = "";
+        buf += "<tr><td></td>";
+        buf += "<td align='center'>" + generation + "</td>";
+        buf += "<td align='center'>" + (pop[0].fitness / 10e8).toFixed(5) + " " + decision.workpieces.length + "</td>";
+        buf += "<td align='center'>" + decision.scraps_percent.toFixed(3) + "</td>";
+        buf += "</tr>";
+        $("#results tbody").prepend(buf);
+
+        if(!this.progressbar){
+            row = $("#results tbody tr")[0];
+            row.cells[0].innerHTML = "<div style='margin: 0px; width: 100%; height: 20px; position: relative;'></div>";
+
+            this.progressbar = new ProgressBar.Line(row.cells[0].firstChild, {
+                        strokeWidth: 1,
+                        easing: 'easeInOut',
+                        duration: 1400,
+                        color: '#ddd',
+                        trailColor: '#eee',
+                        trailWidth: 1,
+                        svgStyle: {width: '100%', height: '100%'},
+                        text: {
+                            style: {
+                                // Text color.
+                                // Default: same as stroke color (options.color)
+                                color: '#333',
+                                position: 'absolute',
+                                left: '50%',
+                                top: '0px',
+                                padding: 0,
+                                margin: 0,
+                                transform: null
+                            },
+                            autoStyleContainer: false
+                        },
+                        from: {color: '#FFEA82'},
+                        to: {color: '#ED6A5A'},
+                        step: function (state, bar) {
+                            bar.setText(Math.round(bar.value() * 100) + ' %');
+                        }
+            });
+            this.progressbar.animate(0.9);
+        }
+    };
+
+
+    $(document).ready(function () {
+        $("#solve").click(function () {
+
+            $("#results tbody").html("");
+
+            $("#solve").prop( "disabled", true );
+
+            var config = {
+                iterations: 3000,
+                size: 200,
+                crossover: 0.3,
+                mutation: 0.3,
+                skip: 60,
+                webWorkers: true
+            };
+
+            var userData = {
+                products: $("#products").val().split("\n").map(function(v){return parseInt(v)}),
+                workpieces: $("#workpieces").val().split("\n").map(function(v){return parseInt(v)}),
+                knifewidth: 4,
+                overmeasure: 0,
+                sticklength: 6000,
+                wrongsnipmin: 0,
+                wrongsnipmax: 0,
+                usefulscrap: 600
+            };
+
+            $("#params").val().split("\n").forEach(function (v) {
+
+                var prm = v.split(" ");
+
+                if(config.hasOwnProperty(prm[0]))
+                    config[prm[0]] = parseFloat(prm[1]);
+
+                else if(userData.hasOwnProperty(prm[0]))
+                    userData[prm[0]] = parseFloat(prm[1]);
+            });
+
+
+            cutting.genetic.evolve(config, userData);
         });
-
-
-        cutting.genetic.evolve(config, userData);
-	});
-});
+    });
 
 
 </script>
