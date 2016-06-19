@@ -1,5 +1,6 @@
 /**
  * Визуализация раскроя
+ * &copy; Evgeniy Malyarov http://www.oknosoft.ru 2014-2016
  * @module visualization
  * Created 18.06.2016
  */
@@ -89,7 +90,7 @@
 				res.reduce(function (sum, curr) {
 					new paper.Path({
 						segments: [[x+sum+h/2, y+4], [x+sum+curr-h/2, y+4], [x+sum+curr, y+h-4], [x+sum, y+h-4]],
-						fillColor: new paper.Color(Math.random() * 0.2 + 0.7, Math.random() * 0.3 + 0.6, Math.random() * 0.2 + 0.7),
+						fillColor: new paper.Color(Math.random() * 0.1 + 0.7, Math.random() * 0.3 + 0.66, Math.random() * 0.2 + 0.77),
 						closed: true
 					});
 					new paper.PointText({

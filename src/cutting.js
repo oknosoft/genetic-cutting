@@ -1,5 +1,6 @@
 /**
  * Оптимизатор раскроя
+ * &copy; Evgeniy Malyarov http://www.oknosoft.ru 2014-2016
  * @module cutting
  * Created 15.06.2016
  */
@@ -43,6 +44,11 @@
 		 * @return {Int16Array}
 		 */
 		this.seed = function() {
+
+			if(!Int16Array.prototype.fill){
+				throw new Error("Unsupported browser. Use Chrome, FireFox or MS EDGE\n\nУстаревший браузер. Используйте Chrome, FireFox или MS EDGE\n");
+			}
+
 
 			var len = this.userData.products.length,
 				decision = new Int16Array(len).fill(-1),
@@ -256,7 +262,17 @@
 		 */
 		this.generation = function(pop, generation, stats) {
 			// stop running once we've reached the solution
-			return true;
+			if(generation < this.configuration.skip || generation % this.configuration.skip !=0)
+				return true;
+
+			var decision = this.fitness(pop[0].entity, true),
+				usefulscrap = this.userData.usefulscrap;
+			// останавливаем эволюцию, если обрезь < 1% и нет длинных обрезков
+			if((decision.scraps_percent < 0.5 && generation > this.configuration.iterations / 3) ||
+				(decision.scraps_percent < 1 && decision.workpieces.every(function (val) {
+					return val < usefulscrap
+				})))
+				return false;
 		};
 
 	};
