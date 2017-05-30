@@ -1,0 +1,31 @@
+{
+  "name": "genetic-cutting",
+  "description": "linear cutting optimizer",
+  "version": "0.1.0",
+  "author": "Evgeniy Malyarov <info@oknosoft.ru> (http://www.oknosoft.ru)",
+  "license": "AGPL",
+  "engines": {
+    "node": "^7.10",
+    "npm": "^4.2"
+  },
+  "dependencies": {
+
+  },
+  "devDependencies": {
+    "gulp": "^3.9",
+    "gulp-base64": "^0.1",
+    "gulp-concat": "^2.6",
+    "gulp-csso": "^3.0",
+    "gulp-rename": "^1.2",
+    "gulp-replace": "^0.5",
+    "gulp-strip-comments": "^2.4",
+    "gulp-uglify": "^3.0",
+    "gulp-umd": "^0.2",
+    "gulp-wrap": "^0.13.0"
+  },
+  "homepage": "http://www.oknosoft.ru/zd/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oknosoft/genetic-cutting.git"
+  }
+}
