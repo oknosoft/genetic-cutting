@@ -6,7 +6,7 @@
  * Created by Evgeniy Malyarov on 27.09.2018.
  */
 
-const Genetic = require('genetic-js');
+const Genetic = require('./genetic');
 const Engine1D  = require('./Engine1D');
 
 class Cutting {

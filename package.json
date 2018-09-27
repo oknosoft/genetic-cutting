@@ -9,7 +9,6 @@
     "npm": "^6.0"
   },
   "dependencies": {
-    "genetic-js": "github:unpete/genetic-js"
   },
   "devDependencies": {
     "gulp": "^3.9",
