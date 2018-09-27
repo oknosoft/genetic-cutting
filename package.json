@@ -3,23 +3,23 @@
   "description": "linear cutting optimizer",
   "version": "0.1.0",
   "author": "Evgeniy Malyarov <info@oknosoft.ru> (http://www.oknosoft.ru)",
-  "license": "AGPL",
+  "license": "MIT",
   "engines": {
-    "node": "^7.10",
-    "npm": "^4.2"
+    "node": "^8.8",
+    "npm": "^6.0"
   },
   "dependencies": {
-
+    "genetic-js": "github:unpete/genetic-js"
   },
   "devDependencies": {
     "gulp": "^3.9",
     "gulp-base64": "^0.1",
     "gulp-concat": "^2.6",
-    "gulp-csso": "^3.0",
-    "gulp-rename": "^1.2",
+    "gulp-csso": "^3.0.1",
+    "gulp-rename": "^1.4.0",
     "gulp-replace": "^0.5",
-    "gulp-strip-comments": "^2.4",
-    "gulp-uglify": "^3.0",
+    "gulp-strip-comments": "^2.5.2",
+    "gulp-uglify": "^3.0.1",
     "gulp-umd": "^0.2",
     "gulp-wrap": "^0.13.0"
   },
