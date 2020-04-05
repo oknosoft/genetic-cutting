@@ -1,26 +1,25 @@
 {
   "name": "genetic-cutting",
   "description": "linear cutting optimizer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Evgeniy Malyarov <info@oknosoft.ru> (http://www.oknosoft.ru)",
   "license": "SEE LICENSE IN LICENSE.md",
   "engines": {
     "node": "^8.8",
     "npm": "^6.0"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
-    "gulp": "^3.9",
+    "gulp": "^4.0",
     "gulp-base64": "^0.1",
     "gulp-concat": "^2.6",
-    "gulp-csso": "^3.0.1",
-    "gulp-rename": "^1.4.0",
-    "gulp-replace": "^0.5",
-    "gulp-strip-comments": "^2.5.2",
-    "gulp-uglify": "^3.0.1",
-    "gulp-umd": "^0.2",
-    "gulp-wrap": "^0.13.0"
+    "gulp-csso": "^4.0",
+    "gulp-rename": "^2.0",
+    "gulp-replace": "^1.0",
+    "gulp-strip-comments": "^2.5",
+    "gulp-uglify": "^3.0.2",
+    "gulp-umd": "^2.0",
+    "gulp-wrap": "^0.15"
   },
   "main": "src/index.js",
   "homepage": "http://www.oknosoft.ru/zd/",

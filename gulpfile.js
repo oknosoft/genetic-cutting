@@ -16,13 +16,13 @@ gulp.task('linear-solver', function(){
 	gulp.src([
 		'./lib/genetic.js',
 		'./src/cutting.js',
-		'./src/visualization.js',
+		'./src/index.js',
 		'./src/linear-solver.js'
 	])
 		.pipe(concat('linear-solver.js'))
 		.pipe(gulp.dest('./dist'))
-		.pipe(rename('linear-solver.min.js'))
-		.pipe(uglify())
-		.pipe(gulp.dest('./dist'))
+		// .pipe(rename('linear-solver.min.js'))
+		// .pipe(uglify())
+		// .pipe(gulp.dest('./dist'))
 	;
 });

@@ -14,10 +14,11 @@ $(document).ready(function () {
 
 	cutting.genetic.notification = function(pop, generation, stats, isFinished) {
 
-		if (generation == 0)
-			return;
+    if(generation == 0) {
+      return;
+    }
 
-		var decision = this.fitness(pop[0].entity, true), row;
+    var decision = this.fitness(pop[0].entity, true), row;
 
 		if(isFinished){
 			$("#linear-solver-solve").prop( "disabled", false );

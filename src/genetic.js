@@ -231,14 +231,14 @@ var Genetic = Genetic || (function(){
         stats: stats,
         isFinished: isFinished
 			};
-			
-			
-			if (this.usingWebWorker) {
-				postMessage(response);
-			} else {
-				// self declared outside of scope
-				self.notification(response.pop.map(Serialization.parse), response.generation, response.stats, response.isFinished);
-			}
+
+      if(this.usingWebWorker) {
+        postMessage(response);
+      }
+      else {
+        // self declared outside of scope
+        self.notification(response.pop.map(Serialization.parse), response.generation, response.stats, response.isFinished);
+      }
 			
 		};
 	}
@@ -286,8 +286,11 @@ var Genetic = Genetic || (function(){
 			var blob = new Blob([blobScript]);
 			var worker = new Worker(window.URL.createObjectURL(blob));
 			worker.onmessage = function(e) {
-			  var response = e.data;
-			  self.notification(response.pop.map(Serialization.parse), response.generation, response.stats, response.isFinished);
+			  const {pop, generation, stats, isFinished} = e.data;
+			  self.notification(pop.map(Serialization.parse), generation, stats, isFinished);
+			  if(isFinished) {
+          self.terminate();
+        }
 			};
 			worker.onerror = function(e) {
 				alert('ERROR: Line ' + e.lineno + ' in ' + e.filename + ': ' + e.message);

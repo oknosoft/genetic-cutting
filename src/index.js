@@ -19,11 +19,9 @@ class Cutting {
     this.genetic.select1 = Genetic.Select1.Tournament2;
     this.genetic.select2 = Genetic.Select2.Tournament2;
 
-    this.genetic.seed = this.engine.seed;
-    this.genetic.mutate = this.engine.mutate;
-    this.genetic.crossover = this.engine.crossover;
-    this.genetic.fitness = this.engine.fitness;
-    this.genetic.generation = this.engine.generation;
+    for(const prop of ['seed', 'mutate', 'crossover', 'fitness', 'generation']) {
+      this.genetic[prop] = this.engine[prop];
+    }
   }
 
   evolve(config, userData) {
