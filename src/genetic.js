@@ -283,13 +283,13 @@ var Genetic = Genetic || (function(){
 		
 		if (this.usingWebWorker) {
 			// webworker
-			var blob = new Blob([blobScript]);
-			var worker = new Worker(window.URL.createObjectURL(blob));
+			const blob = new Blob([blobScript]);
+      const worker = new Worker(window.URL.createObjectURL(blob));
 			worker.onmessage = function(e) {
 			  const {pop, generation, stats, isFinished} = e.data;
 			  self.notification(pop.map(Serialization.parse), generation, stats, isFinished);
 			  if(isFinished) {
-          self.terminate();
+          worker.terminate();
         }
 			};
 			worker.onerror = function(e) {
