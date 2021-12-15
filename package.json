@@ -5,8 +5,8 @@
   "author": "Evgeniy Malyarov <info@oknosoft.ru> (http://www.oknosoft.ru)",
   "license": "SEE LICENSE IN LICENSE.md",
   "engines": {
-    "node": "^12.18",
-    "npm": "^6.14"
+    "node": "^16.13",
+    "yarn": "^1.22"
   },
   "dependencies": {},
   "devDependencies": {
