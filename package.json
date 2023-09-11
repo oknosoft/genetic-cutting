@@ -5,13 +5,11 @@
   "author": "Evgeniy Malyarov <info@oknosoft.ru> (http://www.oknosoft.ru)",
   "license": "SEE LICENSE IN LICENSE.md",
   "engines": {
-    "node": ">=20.2",
+    "node": ">=4.9",
     "yarn": "^1.22"
   },
   "dependencies": {
-    "decompress": "^4.2.1",
-    "iconv": "^3.0.1",
-    "rimraf": "^5.0.1"
+    "decompress": "^4.2.1"
   },
   "devDependencies": {},
   "main": "src/index.mjs",
