@@ -1,0 +1,13 @@
+# Created by .ignore support plugin (hsz.mobi)
+
+# Editor files
+.idea
+.vscode
+
+# Exclude compiled files
+bin/cut2d.zip
+
+# npm files
+node_modules
+*.lock
+*.log

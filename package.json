@@ -1,17 +1,20 @@
 {
   "name": "cutting-queue",
-  "description": "linear cutting optimizer",
+  "description": "cutting optimizer",
   "version": "0.2.0",
   "author": "Evgeniy Malyarov <info@oknosoft.ru> (http://www.oknosoft.ru)",
   "license": "SEE LICENSE IN LICENSE.md",
   "engines": {
-    "node": "^16.13",
+    "node": ">=20.2",
     "yarn": "^1.22"
   },
-  "dependencies": {},
-  "devDependencies": {
+  "dependencies": {
+    "decompress": "^4.2.1",
+    "iconv": "^3.0.1",
+    "rimraf": "^5.0.1"
   },
-  "main": "src/index.js",
+  "devDependencies": {},
+  "main": "src/index.mjs",
   "homepage": "http://www.oknosoft.ru/zd/",
   "repository": {
     "type": "git",

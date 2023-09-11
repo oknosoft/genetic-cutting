@@ -1,0 +1,14 @@
+.DS_Store
+.idea
+build
+config
+data
+doc
+localstorage
+node_modules
+public
+scripts
+zarchive
+
+/package-lock.json
+*.log
