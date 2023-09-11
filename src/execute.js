@@ -1,81 +1,20 @@
 "use strict";
 
-const fs = require('fs');
 const join = require('path').join;
-const tmpdir = require('os').tmpdir;
 const spawn = require("child_process").spawn;
 const decompress = require('decompress');
-require('./866');
-
+const decode = require('./866');
+const io = require('./io');
 
 function execute(products, scraps) {
-  return new Promise((resolve, reject) =>  fs.mkdtemp(join(tmpdir(), 'cut-'), (err, tmpPath) => {
-    if(err) {
-      reject(err);
-    }
-    else {
-      resolve(tmpPath);
-    }
-  }))
+  return io.tmpdir()
     // извлекаем файлы оптимизатора во временный каталог
-    .then((tmpPath) => {
-      return decompress(join(__dirname, '../bin/cut2d.zip'), tmpPath)
-        .then(() => tmpPath);
-    })
+    //.then((tmpPath) => decompress(join(__dirname, '../bin/cut2d.zip'), tmpPath).then(() => tmpPath))
     // создаём файлы параметров
-    .then((tmpPath) => createPrm(products, scraps, tmpPath))
-    .then((tmpPath) => optimize(tmpPath))
-    //.then((tmpPath) => rimraf(tmpPath));
-}
-
-function createPrm(products, scraps, tmpPath) {
-  if(!products.length || !scraps.length) {
-    throw new Error('Пустой список изделий или заготовок');
-  }
-  let zag = `\n\n`;
-  for(const product of products) {
-    zag += `${product.width}\t${product.htight}\t${product.quantity || 1}\t+\n`;
-  }
-  return new Promise((resolve, reject) => {
-    fs.writeFile(join(tmpPath, 'ZAG.CFG'), zag, (err) => {
-      if(err) {
-        reject(err);
-      }
-      else {
-        resolve();
-      }
-    });
-  })
-    .then(() => {
-      let list = '0\n0\n10\t500\t300\n';
-      let othod = new Uint8Array(scraps.length);
-      scraps.forEach((scrap, index) => {
-        list += `${scrap.width}\t${scrap.htight}\t${scrap.quantity || 1}\n`;
-        if(scrap.scrap) {
-          othod[index] = 1;
-        }
-      });
-      return new Promise((resolve, reject) => {
-        fs.writeFile(join(tmpPath, 'LIST.CFG'), list, (err) => {
-          if(err) {
-            reject(err);
-          }
-          else {
-            resolve(new Promise((resolve, reject) => {
-              fs.writeFile(join(tmpPath, 'OTHOD.THN'), othod, (err) => {
-                if(err) {
-                  reject(err);
-                }
-                else {
-                  resolve();
-                }
-              });
-            }));
-          }
-        });
-      })
-    })
-    .then(() => tmpPath);
+    .then((tmpPath) => io.prepare(products, scraps, tmpPath))
+    //.then((tmpPath) => optimize(tmpPath))
+    .then((tmpPath) => io.extract(tmpPath))
+    //.then((tmpPath) => io.rimraf(tmpPath));
 }
 
 function optimize(tmpPath){
@@ -103,34 +42,5 @@ function optimize(tmpPath){
   });
 }
 
-function decode(buffer) {
-  let res = '';
-  for(let i=0; i<buffer.length; i++) {
-    res += cptable[866].dec[buffer[i]];
-  }
-  return res;
-}
-
-function rimraf(tmpPath) {
-  return new Promise((resolve, reject) => {
-    fs.readdir(tmpPath, (err, files) => {
-      if (!err) {
-        try {
-          for (let file of files) {
-            fs.unlinkSync(join(tmpPath, file));
-          }
-          fs.rmdirSync(tmpPath);
-          resolve(tmpPath);
-        }
-        catch (err) {
-          reject(err);  
-        }
-      }
-      else {
-        reject(err);
-      }
-    });
-  })
-}
 
 module.exports = execute;

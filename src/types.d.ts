@@ -5,25 +5,25 @@
  */
 
 interface Params {
-    param: string;
-    value: any;
+  param: string;
+  value: any;
 }
 
 interface Stat {
-    param: string;
-    value: any;
+  param: string;
+  value: any;
 }
 
 interface ProductRow {
-    id: string;
-    length: number;
-    htight: number;
+  id: string;
+  length: number;
+  height: number;
 }
 
 interface CutRow {
-    id: string;
-    length: number;
-    htight: number;
+  id: string;
+  length: number;
+  height: number;
 }
 
 interface RequestBody {
