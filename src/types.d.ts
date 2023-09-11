@@ -16,14 +16,14 @@ interface Stat {
 
 interface ProductRow {
     id: string;
-    len: number;
-    width: number;
+    length: number;
+    htight: number;
 }
 
 interface CutRow {
     id: string;
-    len: number;
-    width: number;
+    length: number;
+    htight: number;
 }
 
 interface RequestBody {
@@ -39,4 +39,3 @@ interface ResponseBody {
     products: Array<ProductRow>;    // Результат раскроя (на какую заготоку положить какое изделие)
     cuts: Array<CutRow>;            // Результат раскроя (использованная и вновь образовавшаяся деловая обрезь)
 }
-

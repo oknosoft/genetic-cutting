@@ -1,12 +1,14 @@
-const fs = require('node:fs');
-const join = require('node:path').join;
-const tmpdir = require('node:os').tmpdir;
-const spawn = require("node:child_process").spawn;
+"use strict";
+
+const fs = require('fs');
+const join = require('path').join;
+const tmpdir = require('os').tmpdir;
+const spawn = require("child_process").spawn;
 const decompress = require('decompress');
 require('./866');
 
 
-function execute({products, scraps}) {
+function execute(products, scraps) {
   return new Promise((resolve, reject) =>  fs.mkdtemp(join(tmpdir(), 'cut-'), (err, tmpPath) => {
     if(err) {
       reject(err);
@@ -17,16 +19,16 @@ function execute({products, scraps}) {
   }))
     // извлекаем файлы оптимизатора во временный каталог
     .then((tmpPath) => {
-      return decompress('../bin/cut2d.zip', tmpPath)
+      return decompress(join(__dirname, '../bin/cut2d.zip'), tmpPath)
         .then(() => tmpPath);
     })
     // создаём файлы параметров
-    .then((tmpPath) => createPrm({products, scraps, tmpPath}))
+    .then((tmpPath) => createPrm(products, scraps, tmpPath))
     .then((tmpPath) => optimize(tmpPath))
-    .then((tmpPath) => rimraf(tmpPath));
+    //.then((tmpPath) => rimraf(tmpPath));
 }
 
-function createPrm({products, scraps, tmpPath}) {
+function createPrm(products, scraps, tmpPath) {
   if(!products.length || !scraps.length) {
     throw new Error('Пустой список изделий или заготовок');
   }
@@ -82,15 +84,15 @@ function optimize(tmpPath){
     const ls = spawn(join(tmpPath, 'rs.exe'), {cwd: tmpPath});
 
     ls.stdout.on("data", data => {
-      console.log(`stdout: ${decode(data)}`);
+      console.log(decode(data));
     });
 
     ls.stderr.on("data", data => {
-      console.log(`stderr: ${data}`);
+      console.error(decode(data));
     });
 
     ls.on('error', (err) => {
-      console.error(`error: ${err.message}`);
+      console.error(err);
       reject(err);
     });
 
