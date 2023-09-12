@@ -5,9 +5,10 @@
 .vscode
 
 # Exclude compiled files
-bin
+/bin/
 
 # npm files
 node_modules
 *.lock
 *.log
+
