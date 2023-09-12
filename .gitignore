@@ -5,7 +5,7 @@
 .vscode
 
 # Exclude compiled files
-bin/cut2d.zip
+bin
 
 # npm files
 node_modules
