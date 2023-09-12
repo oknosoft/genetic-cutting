@@ -2,19 +2,25 @@
 
 const join = require('path').join;
 const spawn = require("child_process").spawn;
-const decompress = require('decompress');
 const decode = require('./866');
 const io = require('./io');
 
 function execute(products, scraps) {
+  let tmpPath;
   return io.tmpdir()
     // извлекаем файлы оптимизатора во временный каталог
-    //.then((tmpPath) => decompress(join(__dirname, '../bin/cut2d.zip'), tmpPath).then(() => tmpPath))
+    .then((tmp) => {
+      tmpPath = tmp;
+      return io.cpdir(join(__dirname, '../bin'), tmpPath);
+    })
     // создаём файлы параметров
-    .then((tmpPath) => io.prepare(products, scraps, tmpPath))
-    //.then((tmpPath) => optimize(tmpPath))
-    .then((tmpPath) => io.extract(tmpPath))
-    //.then((tmpPath) => io.rimraf(tmpPath));
+    .then(() => io.prepare(products, scraps, tmpPath))
+    .then(() => optimize(tmpPath))
+    .then(() => io.extract(tmpPath))
+    .catch((err) => {
+      console.error(err);
+    })
+    .then(() => io.rimraf(tmpPath));
 }
 
 function optimize(tmpPath){

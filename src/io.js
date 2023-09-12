@@ -15,8 +15,7 @@ module.exports = {
             for (let file of files) {
               fs.unlinkSync(join(tmpPath, file));
             }
-            fs.rmdirSync(tmpPath);
-            resolve(tmpPath);
+            resolve(fs.rmdirSync(tmpPath));
           }
           catch (err) {
             reject(err);
@@ -35,7 +34,7 @@ module.exports = {
         reject(err);
       }
       else {
-        resolve('D:\\TEMP\\cut-UMZKnL');
+        resolve(tmpPath);
       }
     }))
   },
@@ -65,6 +64,38 @@ module.exports = {
     });
   },
   
+  cpdir(src, dst) {
+    return new Promise((resolve, reject) => {
+      fs.readdir(src, (err, files) => {
+        if (err) {
+          reject(err)
+        }
+        else {
+          let res = Promise.resolve();
+          for(const file of files) {
+            res = res.then(() => this.link(join(src, file), join(dst, file)));
+          }
+          res
+            .then(resolve)
+            .catch(reject);
+        }
+      });
+    });
+  },
+  
+  link(src, dst) {
+    return new Promise((resolve, reject) => {
+      fs.link(src, dst, (err) => {
+        if (err) {
+          reject(err)
+        }
+        else {
+          resolve();
+        }
+      });
+    });
+  },
+  
   prepare(products, scraps, tmpPath) {
     if (!products.length || !scraps.length) {
       throw new Error('Пустой список изделий или заготовок');
@@ -85,19 +116,20 @@ module.exports = {
         });
         return this.write(join(tmpPath, 'LIST.CFG'), list)
           .then(() => this.write(join(tmpPath, 'OTHOD.THN'), othod));
-      })
-      .then(() => tmpPath);
+      });
   },
 
   // анализирует файлы с ошибкам
   errors(tmpPath) {
     return new Promise((resolve, reject) => {
       // если существует FILE.LOG - это ошибка и её содержимое надо вернуть в reject
-      fs.access(join(tmpPath, 'FILE.LOG'), fs.R_OK, (err) => {
+      const log = join(tmpPath, 'FILE.LOG');
+      fs.access(log, fs.R_OK, (err) => {
         // err в нашем случае, хорошо
         if(err) {
           // K.DAT - первые два байта должны быть нули
           resolve(this.read(join(tmpPath, 'K.DAT'))
+            .catch(() => [0, 0])
             .then((data) => {
               if(data[0] || data[1]) {
                 throw new Error('K.DAT');
@@ -105,7 +137,10 @@ module.exports = {
             }));
         }
         else {
-          reject(this.read(name).then(decode));
+          this.read(log)
+            .then(decode)
+            .then(reject)
+            .catch(reject);
         }
       });
     })

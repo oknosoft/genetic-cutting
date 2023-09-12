@@ -8,9 +8,7 @@
     "node": ">=4.9",
     "yarn": "^1.22"
   },
-  "dependencies": {
-    "decompress": "^4.2.1"
-  },
+  "dependencies": {},
   "devDependencies": {},
   "main": "src/index.mjs",
   "homepage": "http://www.oknosoft.ru/zd/",
