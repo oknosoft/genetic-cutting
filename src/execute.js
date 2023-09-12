@@ -10,17 +10,17 @@ function execute(products, scraps) {
   return io.tmpdir()
     // извлекаем файлы оптимизатора во временный каталог
     .then((tmp) => {
-      tmpPath = tmp;
-      return io.cpdir(join(__dirname, '../bin'), tmpPath);
+      tmpPath = 'D:\\WORK\\JS\\genetic-cutting\\bin\\result';
+      //return io.cpdir(join(__dirname, '../bin'), tmpPath);
     })
     // создаём файлы параметров
     .then(() => io.prepare(products, scraps, tmpPath))
-    .then(() => optimize(tmpPath))
-    .then(() => io.extract(tmpPath))
+    //.then(() => optimize(tmpPath))
+    .then(() => io.extract({tmpPath, products, scraps}))
     .catch((err) => {
       console.error(err);
     })
-    .then(() => io.rimraf(tmpPath));
+    //.then(() => io.rimraf(tmpPath));
 }
 
 function optimize(tmpPath){

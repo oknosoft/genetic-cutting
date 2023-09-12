@@ -109,6 +109,8 @@ module.exports = {
         let list = '0\n0\n10\t500\t300\n';
         let othod = new Uint8Array(scraps.length);
         scraps.forEach((scrap, index) => {
+          scrap.id = 0;
+          scrap.rowId = index + 1;
           list += `${scrap.length}\t${scrap.height}\t${scrap.quantity || 1}\n`;
           if (scrap.scrap) {
             othod[index] = 1;
@@ -148,37 +150,72 @@ module.exports = {
   },
 
   // извлекает результат раскроя
-  extract(tmpPath) {
-    const res = {};
+  extract({tmpPath, products, scraps}) {
+    const res = {scraps: []};
+    
+    const findScrapIn = (rowId) => {
+      const rows = scraps.filter(v => v.id === 0 && v.rowId === rowId);
+      if(rows.length === 1) {
+        const row = rows[0];
+        row.id = rowId;
+        row.quantity = 1;
+        return row;
+      }
+      const row = {...scraps.find(v => v.rowId === rowId)};
+      scraps.push(row);
+      row.id = scraps.length;
+      row.quantity = 1;
+      return row;
+    }
+    
     return this.errors(tmpPath)
-      .then(() => this.read(join(tmpPath, 'RASKREND.DAT')))
-      .then(decode)
-      .then((data) => {
-        const rows = data.split('Раскpой ');
-        rows.forEach((row, index) => {
-          const tmp = row.trim().split('\r\n');
-          tmp.forEach((row, index) => {
-            if(row.includes('\t')) {
-              tmp[index] = row.split('\t').map(v => parseFloat(v)); 
-            }
-            else {
-              tmp[index] = parseFloat(tmp[index]);
-            }
-          });
-          rows[index] = tmp;
-        });
-        res.products = rows;
-      })
       .then(() => this.read(join(tmpPath, 'OTHOD.DAT')))
       .then(decode)
       .then((data) => {
         const rows = data.split('\r\n');
         rows.forEach((row, index) => {
           if(rows[index]) {
-            rows[index] = row.trim().split('\t').map(v => parseFloat(v));
+            const flat = row.trim().split('\t').map(v => parseFloat(v));
+            const scrap = {
+              id: flat[0],
+              x: flat[1],
+              y: flat[2],
+              length: flat[3],
+              height: flat[4],
+            }
+            if((scrap.length > 500 && scrap.height > 300) || (scrap.length > 300 && scrap.height > 500)) {
+              res.scraps.push(scrap);
+            }
           }
         });
-        res.scraps = rows.filter(v => Array.isArray(v));
+      })
+      .then(() => this.read(join(tmpPath, 'RASKREND.DAT')))
+      .then(decode)
+      .then((data) => {
+        const rows = data.split('Раскpой ');
+        rows.forEach((row, index) => {
+          const tmp = row.trim().split('\r\n')
+            .map(v => v.includes('\t') ? v.split('\t').map(v => parseFloat(v)) : parseFloat(v));
+          if(tmp.length > 5) {
+            const flat = tmp[2];
+            if(flat[3] !== 1) {
+              throw new Error('Раскрой2D - число заготовок в RASKREND !== 1');
+            }
+            const scrap = {
+              id: tmp[0],
+              length: flat[0],
+              height: flat[1],
+              sid: flat[2],
+            }
+            let scrapIn = scraps[scrap.id - 1];
+            if(scrapIn.length !== scrap.length || scrapIn.height !== scrap.height) {
+              throw new Error('Раскрой2D - отличаются размеры в ОбрезьВход и RASKREND');
+            }
+            scrapIn = findScrapIn(scrapIn.rowId);
+          }
+          
+        });
+        res.products = rows;
       });
   }
 };
