@@ -17,7 +17,7 @@ function execute(products, scraps) {
     // создаём файлы параметров
     .then(() => io.prepare(products, scraps, tmpPath))
     .then(() => optimize(tmpPath))
-    .then(() => io.extract({tmpPath, products, scraps}))
+    .then(() => io.extract(products, scraps, tmpPath))
     .then((res) => result = res)
     .catch((err) => error = err)
     .then(() => io.rimraf(tmpPath))

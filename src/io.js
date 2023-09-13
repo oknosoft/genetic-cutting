@@ -7,6 +7,20 @@ const decode = require('./866');
 
 module.exports = {
 
+  body(req) {
+    return new Promise((resolve, reject) => {
+      let data = '';
+      req.on('data', (chunk) => data += chunk);
+      req.on('end', () => {
+        if(data.length > 0 && data.charCodeAt(0) == 65279) {
+          data = data.substring(1);
+        }
+        resolve(data);
+      });
+      req.on('error', reject);
+    });
+  },
+
   rimraf(tmpPath) {
     return new Promise((resolve, reject) => {
       fs.readdir(tmpPath, (err, files) => {
@@ -73,6 +87,9 @@ module.exports = {
         else {
           let res = Promise.resolve();
           for(const file of files) {
+            if(file.startsWith('result')) {
+              continue;
+            }
             res = res.then(() => this.link(join(src, file), join(dst, file)));
           }
           res
@@ -150,7 +167,7 @@ module.exports = {
   },
 
   // извлекает результат раскроя
-  extract({tmpPath, products, scraps}) {
+  extract(products, scraps, tmpPath) {
     const res = {scrapsIn: scraps, scrapsOut: [], products: []};
     
     const findScrapIn = (blank) => {
