@@ -8,10 +8,11 @@
     "node": ">=4.9",
     "yarn": "^1.22"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "node-windows": "^0.1.11"
+  "dependencies": {
+    "node-fetch": "^2.6",
+    "paper-jsdom-canvas": "^0.12.17"
   },
+  "devDependencies": {},
   "main": "src/index.mjs",
   "homepage": "http://www.oknosoft.ru/zd/",
   "repository": {
