@@ -9,7 +9,9 @@
     "yarn": "^1.22"
   },
   "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "node-windows": "^0.1.11"
+  },
   "main": "src/index.mjs",
   "homepage": "http://www.oknosoft.ru/zd/",
   "repository": {

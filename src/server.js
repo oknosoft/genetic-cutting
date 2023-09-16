@@ -52,13 +52,13 @@ function listener (req, res) {
       return clearInterval(ping);
     }
     res.write('\n');
-  }, 2000);
+  }, 20000);
 
+  res.writeHead(200, headers);
   getBody(req)
     .then(JSON.parse)
     .then(solve)
     .then((data) => {
-      res.writeHead(200, headers);
       res.end(JSON.stringify(data));
     })
     .catch((err) => {

@@ -6,9 +6,11 @@
 
 # Exclude compiled files
 /bin/
+/src/daemon/
 
 # npm files
 node_modules
 *.lock
 *.log
+
 
