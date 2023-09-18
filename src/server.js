@@ -1,6 +1,5 @@
 "use strict";
 
-const svg = require('./svg');
 const proxy = require('./proxy');
 
 
@@ -14,8 +13,10 @@ const headers = {
 
 module.exports = function cutting($p, log) {
 
-  const {job_prm: {server}, adapters: {pouch}, utils: {moment, hrtime, getBody, end}} = $p;
+  const {job_prm: {server}, EditorInvisible, adapters: {pouch}, utils: {moment, hrtime, getBody, end}} = $p;
   const {ping, pong} = hrtime;
+
+  const svg = require('./svg')(EditorInvisible);
   
   return function listener (req, res) {
     if(req.method !== 'POST') {

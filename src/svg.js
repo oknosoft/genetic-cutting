@@ -1,43 +1,19 @@
 
-const paper = require('paper/dist/paper-core');
+function getSvg() {
 
-paper.Project.prototype.zoomFit = function zoomFit() {
   const bounds = this.activeLayer.bounds;
-  const space = 160;
-  const min = 900;
-  let {width, height, center} = bounds;
-  if (width < min) {
-    width = min;
-  }
-  if (height < min) {
-    height = min;
-  }
-  width += space;
-  height += space;
-  const {view} = this;
-  const zoom = Math.min(view.viewSize.height / height, view.viewSize.width / width);
-  const {scaling} = view._decompose();
-  view.scaling = [Math.sign(scaling.x) * zoom, Math.sign(scaling.y) * zoom];
+  const svg = this.exportSVG({precision: 1});
 
-  const dx = view.viewSize.width - width * zoom;
-  const dy = view.viewSize.height - height * zoom;
-  view.center = center.add([Math.sign(scaling.x) * dx, -Math.sign(scaling.y) * dy]);
-  return bounds;
-};
-
-paper.Project.prototype.getSvg = function getSvg() {
-  this.deselectAll();
-  const bounds = this.zoomFit();
-  const svg = this.exportSVG({precision: 1});  
-
-  svg.setAttribute('x', bounds.x);
-  svg.setAttribute('y', bounds.y);
-  svg.setAttribute('width', bounds.width + 40);
-  svg.setAttribute('height', bounds.height);
+  svg.setAttribute('x', bounds.x.round() - 40);
+  svg.setAttribute('y', bounds.y.round());
+  svg.setAttribute('width', bounds.width.round() + 80);
+  svg.setAttribute('height', bounds.height.round());
   svg.querySelector('g').removeAttribute('transform');
 
   return svg.outerHTML;
 }
+
+const fontSize = 90;
 
 const pathAttr = {
   strokeColor: 'black',
@@ -45,28 +21,49 @@ const pathAttr = {
   strokeScaling: false,
 };
 
-module.exports = function svg(data) {
+module.exports = function wrapper(EditorInvisible) {
   
-  if(!paper.project) {
-    const canvas = paper.createCanvas(1000, 1000);
-    paper.setup(canvas);
-  }
-  for(const scrap of data.scrapsIn) {
-    paper.project.clear();
-    const path = new paper.Path.Rectangle(0, 0, scrap.length, scrap.height);
-    path.set(pathAttr);
-
-    scrap.products = data.products.filter(v => v.blank === scrap.id);
-    for(const product of scrap.products) {
-      const path = new paper.Path.Rectangle(
-        product.x,
-        product.y,
-        product.height,
-        product.length);
+  const editor = new EditorInvisible();
+  const {Path, PointText, project} = editor;
+  
+  
+  return function svg(data) {
+    for(const scrap of data.scrapsIn) {
+      project.clear();
+      const path = new Path.Rectangle(0, 0, scrap.length, scrap.height);
       path.set(pathAttr);
+
+      scrap.products = data.products.filter(v => v.blank === scrap.id);
+      for(const product of scrap.products) {
+        const path = new Path.Rectangle(
+          product.x,
+          product.y,
+          product.height,
+          product.length);
+        path.set(pathAttr);
+        const {bounds} = path;
+        let text = new PointText({
+          content: product.height.toFixed(),
+          fontSize,
+        });
+        text.position = bounds.bottomCenter.add([0, -text.bounds.height/2]);
+        text = new PointText({
+          content: product.length.toFixed(),
+          rotation: -90,
+          fontSize,
+        });
+        text.position = bounds.leftCenter.add([text.bounds.width/2 + 8, 0]);
+        if(product.info) {
+          text = new PointText({
+            content: product.info,
+            fontSize: fontSize * 1.3,
+          });
+          text.position = bounds.center;
+        }
+      }
+      
+      scrap.svg = getSvg.call(project);
     }
-    
-    scrap.svg = paper.project.getSvg();
-  }
-  return data;
+    return data;
+  };  
 }
