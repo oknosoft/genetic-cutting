@@ -4,51 +4,51 @@ const svg = require('./svg');
 const proxy = require('./proxy');
 
 
-const http = require('http');
-const getBody = require('./io').body;
-
-
 const headers = {
   'Content-Type': 'application/json; charset=utf-8',
   'Cache-Control': 'no-cache',
+  'Transfer-Encoding': 'chunked',
   'Access-Control-Allow-Origin': '*',
 };
 
-function listener (req, res) {
-  if(req.method !== 'POST') {
-    res.writeHead(400);
-    return res.end('only POST allowed');
-  }
-  // проверка ip
-  const ip = `${req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || res.socket.remoteAddress}`;
+
+module.exports = function cutting($p, log) {
+
+  const {job_prm: {server}, adapters: {pouch}, utils: {moment, hrtime, getBody, end}} = $p;
+  const {ping, pong} = hrtime;
   
-  const ping = setInterval(() => {
-    if(res.finished) {
-      return clearInterval(ping);
+  return function listener (req, res) {
+    if(req.method !== 'POST') {
+      res.writeHead(400);
+      return res.end('only POST allowed');
     }
-    res.write('\n');
-  }, 20000);
-  
-  getBody(req)
-    .then(JSON.parse)
-    .then(proxy)
-    .then((res) => res.json())
-    .then(svg)
-    .then((data) => {
-      res.writeHead(200, headers);
-      res.end(JSON.stringify(data));
-    })
-    .catch((err) => {
-      res.writeHead(500, headers);
-      res.end(JSON.stringify({error: true, message: err.message || err}));
-    });
-}
 
-const host = 'localhost';
-const port = 3707;
-const server = http.createServer(listener);
-server.listen(port, () => {
-  console.log(`Server is running on http://${host}:${port}`);
-});
-
-module.exports = server;
+    const ping = setInterval(() => {
+      if(!res.headersSent) {
+        res.writeHead(200, headers);
+      }
+      if(res.finished) {
+        return clearInterval(ping);
+      }
+      res.write('\n');
+    }, 20000);
+    
+    getBody(req)
+      .then(JSON.parse)
+      .then(proxy)
+      .then((res) => res.json())
+      .then(svg)
+      .then((data) => {
+        if(!res.headersSent) {
+          res.writeHead(200, headers);
+        }
+        res.end(JSON.stringify(data));
+      })
+      .catch((err) => {
+        if(!res.headersSent) {
+          res.writeHead(500, headers);
+        }
+        res.end(JSON.stringify({error: true, message: err.message || err}));
+      });
+  }
+};

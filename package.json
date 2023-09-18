@@ -1,19 +1,16 @@
 {
-  "name": "cutting-queue",
-  "description": "cutting optimizer",
-  "version": "0.2.0",
+  "name": "cutting-proxy",
+  "description": "cutting optimizer proxy",
+  "version": "0.3.0",
   "author": "Evgeniy Malyarov <info@oknosoft.ru> (http://www.oknosoft.ru)",
   "license": "SEE LICENSE IN LICENSE.md",
   "engines": {
-    "node": ">=4.9",
+    "node": ">=20.2",
     "yarn": "^1.22"
   },
-  "dependencies": {
-    "node-fetch": "^2.6",
-    "paper-jsdom-canvas": "^0.12.17"
-  },
+  "dependencies": {},
   "devDependencies": {},
-  "main": "src/index.mjs",
+  "main": "src/index.js",
   "homepage": "http://www.oknosoft.ru/zd/",
   "repository": {
     "type": "git",
