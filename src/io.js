@@ -127,7 +127,6 @@ module.exports = {
         let othod = new Uint8Array(scraps.length);
         scraps.forEach((scrap, index) => {
           scrap.id = 0;
-          scrap.blank = index + 1;
           list += `${scrap.length}\t${scrap.height}\t${scrap.quantity || 1}\n`;
           if (scrap.scrap) {
             othod[index] = 1;
@@ -170,15 +169,15 @@ module.exports = {
   extract(products, scraps, tmpPath) {
     const res = {scrapsIn: scraps, scrapsOut: [], products: []};
     
-    const findScrapIn = (blank) => {
-      const rows = scraps.filter(v => v.id === 0 && v.blank === blank);
+    const findScrapIn = (stick) => {
+      const rows = scraps.filter(v => v.id === 0 && v.stick === stick);
       if(rows.length === 1) {
         const row = rows[0];
-        row.id = blank;
+        row.id = stick;
         row.quantity = 1;
         return row;
       }
-      const row = Object.assign({}, scraps.find(v => v.blank === blank));
+      const row = Object.assign({}, scraps.find(v => v.stick === stick));
       scraps.push(row);
       row.id = scraps.length;
       row.quantity = 1;
@@ -228,7 +227,7 @@ module.exports = {
             if(scrapIn.length !== scrap.length || scrapIn.height !== scrap.height) {
               throw new Error('Раскрой2D - отличаются размеры в ОбрезьВход и RASKREND');
             }
-            scrapIn = findScrapIn(scrapIn.blank);
+            scrapIn = findScrapIn(scrapIn.stick);
             for(let i=4; i<tmp.length; i++) {
               const flat = tmp[i];
               const product = {
@@ -245,7 +244,8 @@ module.exports = {
                 (Math.abs(prodIn.length - product.length) > 1 || Math.abs(prodIn.height - product.height) > 1)) {
                 throw new Error('Раскрой2D - отличаются размеры в Изделия и RASKREND');
               }
-              product.blank = scrapIn.id;
+              product.stick = scrapIn.id;
+              product.id = prodIn.id;
               product.info = prodIn.info || '';
               res.products.push(product);
             }
