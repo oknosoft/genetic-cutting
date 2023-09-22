@@ -33,7 +33,7 @@ module.exports = function wrapper(EditorInvisible) {
       const path = new Path.Rectangle(0, 0, scrap.length, scrap.height);
       path.set(pathAttr);
 
-      scrap.products = data.products.filter(v => v.blank === scrap.id);
+      scrap.products = data.products.filter(v => v.stick === scrap.id);
       for(const product of scrap.products) {
         const path = new Path.Rectangle(
           product.x,
