@@ -1,8 +1,5 @@
 "use strict";
 
-const proxy = require('./proxy');
-
-
 const headers = {
   'Content-Type': 'application/json; charset=utf-8',
   'Cache-Control': 'no-cache',
@@ -17,6 +14,7 @@ module.exports = function cutting($p, log) {
   const {ping, pong} = hrtime;
 
   const svg = require('./svg')(EditorInvisible);
+  const proxy = require('./proxy')($p);
   
   return function listener (req, res) {
     if(req.method !== 'POST') {
@@ -37,7 +35,6 @@ module.exports = function cutting($p, log) {
     getBody(req)
       .then(JSON.parse)
       .then(proxy)
-      .then((res) => res.json())
       .then(svg)
       .then((data) => {
         if(!res.headersSent) {
