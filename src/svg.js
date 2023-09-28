@@ -32,7 +32,7 @@ module.exports = function wrapper(EditorInvisible) {
   return function svg(data) {
     const {scrapsIn, products, options} = data;
     if(!scrapsIn) {
-      throw new Error(JSON.stringify(data));
+      throw new Error(data.message || JSON.stringify(data));
     }
     for(const scrap of scrapsIn) {
       project.clear();
