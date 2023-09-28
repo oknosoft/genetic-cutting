@@ -8,7 +8,8 @@ module.exports = function wrapper({job_prm}) {
       method: 'POST',
       body: JSON.stringify(data),
     })
-      .then((res) => res.json());
+      .then((res) => res.json())
+      .then((res) => Object.assign(res, {options: data.options}));
 
     //return Promise.resolve(res);
   }

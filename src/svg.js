@@ -1,5 +1,7 @@
 
-function getSvg() {
+const scale_svg = require('./scale_svg');
+
+function getSvg(options) {
 
   const bounds = this.activeLayer.bounds;
   const svg = this.exportSVG({precision: 1});
@@ -10,7 +12,7 @@ function getSvg() {
   svg.setAttribute('height', bounds.height.round());
   svg.querySelector('g').removeAttribute('transform');
 
-  return svg.outerHTML;
+  return options?.scale ? scale_svg(svg.outerHTML, options.scale.size, options.scale.padding) : svg.outerHTML;
 }
 
 const fontSize = 90;
@@ -28,12 +30,16 @@ module.exports = function wrapper(EditorInvisible) {
   
   
   return function svg(data) {
-    for(const scrap of data.scrapsIn) {
+    const {scrapsIn, products, options} = data;
+    if(!scrapsIn) {
+      throw new Error(JSON.stringify(data));
+    }
+    for(const scrap of scrapsIn) {
       project.clear();
       const path = new Path.Rectangle(0, 0, scrap.length, scrap.height);
       path.set(pathAttr);
 
-      scrap.products = data.products.filter(v => v.stick === scrap.id);
+      scrap.products = products.filter(v => v.stick === scrap.id);
       for(const product of scrap.products) {
         const path = new Path.Rectangle(
           product.x,
@@ -62,7 +68,7 @@ module.exports = function wrapper(EditorInvisible) {
         }
       }
       
-      scrap.svg = getSvg.call(project);
+      scrap.svg = getSvg.call(project, options);
     }
     return data;
   };  
