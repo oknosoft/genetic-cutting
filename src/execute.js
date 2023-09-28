@@ -36,7 +36,9 @@ function optimize(tmpPath){
 
     ls.stdout.on('data', data => {
       dcount++;
-      console.log(`${dcount}: ${decode(data)}`);
+      if(dcount > 1) {
+        console.log(`${(new Date()).toISOString()}\n ${decode(data)}`);
+      }
     });
 
     ls.stderr.on('data', data => {
@@ -49,8 +51,14 @@ function optimize(tmpPath){
     });
 
     ls.on('close', code => {
-      console.log(`child process exited with code ${code}`);
-      resolve(tmpPath);
+      if(code) {
+        console.error(`${(new Date()).toISOString()} exited with code ${code}\n`);
+        reject(code);
+      }
+      else {
+        console.log(`${(new Date()).toISOString()} exited with code ${code}\n`);
+        resolve(code);
+      }
     });
   });
 }

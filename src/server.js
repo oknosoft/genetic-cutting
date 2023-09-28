@@ -52,7 +52,7 @@ function listener (req, res) {
       return clearInterval(ping);
     }
     res.write('\n');
-  }, 20000);
+  }, 30000);
 
   res.writeHead(200, headers);
   getBody(req)
