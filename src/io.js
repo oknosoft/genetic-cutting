@@ -239,8 +239,7 @@ module.exports = {
                 rotate: flat[5],
               }
               const prodIn = products[product.id - 1];
-              if(product.rotate ? 
-                (Math.abs(prodIn.height - product.length) > 1 || Math.abs(prodIn.length - product.height) > 1) :
+              if((Math.abs(prodIn.height - product.length) > 1 || Math.abs(prodIn.length - product.height) > 1) && 
                 (Math.abs(prodIn.length - product.length) > 1 || Math.abs(prodIn.height - product.height) > 1)) {
                 throw new Error('Раскрой2D - отличаются размеры в Изделия и RASKREND');
               }
