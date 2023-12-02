@@ -198,6 +198,7 @@ module.exports = {
               y: flat[2],
               length: flat[3],
               height: flat[4],
+              rotate: flat[5],
             }
             if((scrap.length > 500 && scrap.height > 300) || (scrap.length > 300 && scrap.height > 500)) {
               res.scrapsOut.push(scrap);
