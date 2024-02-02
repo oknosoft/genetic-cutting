@@ -254,6 +254,12 @@ module.exports = {
         if(products.reduce((sum, curr) => sum + curr.quantity, 0) !== res.products.length) {
           throw new Error('Раскрой2D - не удалось разместить все изделия на заготовках');
         }
+
+        return this.read(join(tmpPath, 'REZ.DAT'));        
+      })
+      .then(decode)
+      .then((data) => {
+        res.rez = data;
         return res;
       });
   }
