@@ -259,7 +259,15 @@ module.exports = {
       })
       .then(decode)
       .then((data) => {
-        res.rez = data;
+        const rows = data.split('Раскpой ');
+        res.rez = [];
+        rows.forEach((row, index) => {
+          const tmp = row.trim().split('\r\n')
+            .map(v => v.includes('\t') ? v.split('\t').map(v => parseFloat(v)) : parseFloat(v));
+          if(tmp.length > 1) {
+            res.rez.push(tmp);
+          }
+        });
         return res;
       });
   }
