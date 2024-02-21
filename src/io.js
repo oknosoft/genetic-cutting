@@ -64,7 +64,7 @@ module.exports = {
       });
     });
   },
-  
+
   read(name) {
     return new Promise((resolve, reject) => {
       fs.readFile(name, (err, data) => {
@@ -77,7 +77,7 @@ module.exports = {
       });
     });
   },
-  
+
   cpdir(src, dst) {
     return new Promise((resolve, reject) => {
       fs.readdir(src, (err, files) => {
@@ -99,7 +99,7 @@ module.exports = {
       });
     });
   },
-  
+
   link(src, dst) {
     return new Promise((resolve, reject) => {
       fs.link(src, dst, (err) => {
@@ -112,7 +112,7 @@ module.exports = {
       });
     });
   },
-  
+
   prepare(products, scraps, tmpPath) {
     if (!products.length || !scraps.length) {
       throw new Error('Пустой список изделий или заготовок');
@@ -162,13 +162,13 @@ module.exports = {
         }
       });
     })
-    
+
   },
 
   // извлекает результат раскроя
   extract(products, scraps, tmpPath) {
     const res = {scrapsIn: scraps, scrapsOut: [], products: []};
-    
+    const scrapIds = new Map();
     const findScrapIn = (stick) => {
       const rows = scraps.filter(v => v.id === 0 && v.stick === stick);
       if(rows.length === 1) {
@@ -183,7 +183,7 @@ module.exports = {
       row.quantity = 1;
       return row;
     }
-    
+
     return this.errors(tmpPath)
       .then(() => this.read(join(tmpPath, 'OTHOD.DAT')))
       .then(decode)
@@ -229,6 +229,7 @@ module.exports = {
               throw new Error('Раскрой2D - отличаются размеры в ОбрезьВход и RASKREND');
             }
             scrapIn = findScrapIn(scrapIn.stick);
+            scrapIds.set(tmp[0], scrapIn.id);
             for(let i=4; i<tmp.length; i++) {
               const flat = tmp[i];
               const product = {
@@ -240,7 +241,7 @@ module.exports = {
                 rotate: flat[5],
               }
               const prodIn = products[product.id - 1];
-              if((Math.abs(prodIn.height - product.length) > 1 || Math.abs(prodIn.length - product.height) > 1) && 
+              if((Math.abs(prodIn.height - product.length) > 1 || Math.abs(prodIn.length - product.height) > 1) &&
                 (Math.abs(prodIn.length - product.length) > 1 || Math.abs(prodIn.height - product.height) > 1)) {
                 throw new Error('Раскрой2D - отличаются размеры в Изделия и RASKREND');
               }
@@ -255,7 +256,7 @@ module.exports = {
           throw new Error('Раскрой2D - не удалось разместить все изделия на заготовках');
         }
 
-        return this.read(join(tmpPath, 'REZ.DAT'));        
+        return this.read(join(tmpPath, 'REZ.DAT'));
       })
       .then(decode)
       .then((data) => {
@@ -265,6 +266,7 @@ module.exports = {
           const tmp = row.trim().split('\r\n')
             .map(v => v.includes('\t') ? v.split('\t').map(v => parseFloat(v)) : parseFloat(v));
           if(tmp.length > 1) {
+            tmp[0] = scrapIds.get(tmp[0]);
             res.rez.push(tmp);
           }
         });
