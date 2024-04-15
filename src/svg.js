@@ -34,6 +34,14 @@ module.exports = function wrapper(EditorInvisible) {
   const editor = new EditorInvisible();
   const {Path, PointText, project} = editor;
   
+  function rectangle(product, scrap) {
+    return new Path.Rectangle(
+      product.x,
+      scrap.height - product.y,
+      product.height,
+      -product.length);
+  }
+  
   
   return function svg(data) {
     const {scrapsIn, scrapsOut, products, options} = data;
@@ -47,11 +55,7 @@ module.exports = function wrapper(EditorInvisible) {
 
       scrap.products = products.filter(v => v.stick === scrap.id);
       for(const product of scrap.products) {
-        const path = new Path.Rectangle(
-          product.x,
-          product.y,
-          product.height,
-          product.length);
+        const path = rectangle(product, scrap);
         path.set(pathAttr);
         const {bounds} = path;
         let text = new PointText({
@@ -76,12 +80,7 @@ module.exports = function wrapper(EditorInvisible) {
 
       scrap.scraps = scrapsOut.filter(v => v.id === scrap.id);
       for(const product of scrap.scraps) {
-        const path = new Path.Rectangle(
-          product.x,
-          product.y,
-          product.length,
-          product.height
-        );
+        const path = rectangle(product, scrap);
         path.set(cutAttr);
         const {bounds} = path;
         let text = new PointText({
