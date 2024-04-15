@@ -55,7 +55,11 @@ module.exports = function wrapper(EditorInvisible) {
 
       scrap.products = products.filter(v => v.stick === scrap.id);
       for(const product of scrap.products) {
-        const path = rectangle(product, scrap);
+        const path = new Path.Rectangle(
+          product.x,
+          scrap.height - product.y,
+          product.height,
+          -product.length);
         path.set(pathAttr);
         const {bounds} = path;
         let text = new PointText({
@@ -80,7 +84,12 @@ module.exports = function wrapper(EditorInvisible) {
 
       scrap.scraps = scrapsOut.filter(v => v.id === scrap.id);
       for(const product of scrap.scraps) {
-        const path = rectangle(product, scrap);
+        const path = new Path.Rectangle(
+          product.x,
+          scrap.height - product.y,
+          product.length,
+          -product.height
+        );
         path.set(cutAttr);
         const {bounds} = path;
         let text = new PointText({
