@@ -7,9 +7,9 @@ function getSvg(options) {
   const svg = this.exportSVG({precision: 1});
 
   svg.setAttribute('x', bounds.x.round() - 40);
-  svg.setAttribute('y', bounds.y.round());
+  svg.setAttribute('y', bounds.y.round() - 20);
   svg.setAttribute('width', bounds.width.round() + 80);
-  svg.setAttribute('height', bounds.height.round());
+  svg.setAttribute('height', bounds.height.round() + 40);
   svg.querySelector('g').removeAttribute('transform');
 
   return options?.scale ? scale_svg(svg.outerHTML, options.scale.size, options.scale.padding) : svg.outerHTML;
@@ -42,22 +42,23 @@ module.exports = function wrapper(EditorInvisible) {
       -product.length);
   }
   
-  
   return function svg(data) {
     const {scrapsIn, scrapsOut, products, options} = data;
     if(!scrapsIn) {
       throw new Error(data.message || JSON.stringify(data));
     }
+    const dx = options?.edges?.dx || 0;
+    const dy = options?.edges?.dy || 0;
     for(const scrap of scrapsIn) {
       project.clear();
-      const path = new Path.Rectangle(-0.5, -0.5, scrap.length + 0.5, scrap.height + 0.5);
+      const path = new Path.Rectangle(-0.5, -0.5 - dy, scrap.length + 1 + dx /2, scrap.height + 1 + dy /2);
       path.set(Object.assign({}, pathAttr, {strokeWidth: 2}));
 
       scrap.products = products.filter(v => v.stick === scrap.id);
       for(const product of scrap.products) {
         const path = new Path.Rectangle(
-          product.x,
-          scrap.height - product.y,
+          product.x + dx,
+          scrap.height - product.y - dy,
           product.height,
           -product.length);
         path.set(pathAttr);
@@ -85,8 +86,8 @@ module.exports = function wrapper(EditorInvisible) {
       scrap.scraps = scrapsOut.filter(v => v.id === scrap.id);
       for(const product of scrap.scraps) {
         const path = new Path.Rectangle(
-          product.x,
-          scrap.height - product.y,
+          product.x + dx,
+          scrap.height - product.y - dy,
           product.length,
           -product.height
         );
