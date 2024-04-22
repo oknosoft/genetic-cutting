@@ -113,7 +113,7 @@ module.exports = {
     });
   },
 
-  prepare(products, scraps, tmpPath) {
+  prepare({products, scraps, options}, tmpPath) {
     if (!products.length || !scraps.length) {
       throw new Error('Пустой список изделий или заготовок');
     }
@@ -123,7 +123,7 @@ module.exports = {
     }
     return this.write(join(tmpPath, 'ZAG.CFG'), zag)
       .then(() => {
-        let list = '0\n0\n10\t500\t300\n';
+        let list = `${options?.edges?.dx || 0} ${options?.edges?.dy || 0}\n0\n10\t480\t360\n`;
         let othod = new Uint8Array(scraps.length);
         scraps.forEach((scrap, index) => {
           scrap.id = 0;
@@ -166,7 +166,7 @@ module.exports = {
   },
 
   // извлекает результат раскроя
-  extract(products, scraps, tmpPath) {
+  extract({products, scraps, options}, tmpPath) {
     const res = {scrapsIn: scraps, scrapsOut: [], products: []};
     const scrapIds = new Map();
     const findScrapIn = (stick) => {
@@ -200,7 +200,7 @@ module.exports = {
               height: flat[4],
               rotate: flat[5],
             }
-            if((scrap.length > 500 && scrap.height > 300) || (scrap.length > 300 && scrap.height > 500)) {
+            if((scrap.length > 480 && scrap.height > 360) || (scrap.length > 360 && scrap.height > 480)) {
               res.scrapsOut.push(scrap);
             }
           }

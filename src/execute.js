@@ -5,7 +5,7 @@ const spawn = require("child_process").spawn;
 const decode = require('./866');
 const io = require('./io');
 
-function execute(products, scraps) {
+function execute({products, scraps, options}) {
   let tmpPath, error, result;
   return io.tmpdir()
     // извлекаем файлы оптимизатора во временный каталог
@@ -15,9 +15,9 @@ function execute(products, scraps) {
       return io.cpdir(join(__dirname, '../bin'), tmpPath);
     })
     // создаём файлы параметров
-    .then(() => io.prepare(products, scraps, tmpPath))
+    .then(() => io.prepare({products, scraps, options}, tmpPath))
     .then(() => optimize(tmpPath))
-    .then(() => io.extract(products, scraps, tmpPath))
+    .then(() => io.extract({products, scraps, options}, tmpPath))
     .then((res) => result = res)
     .catch((err) => error = err)
     .then(() => io.rimraf(tmpPath))

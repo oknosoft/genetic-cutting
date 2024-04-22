@@ -30,7 +30,7 @@ function solve(body) {
   if(!body.scraps) {
     body.scraps = scraps.map(v => Object.assign({}, v));
   }
-  return execute(body.products, body.scraps);
+  return execute(body);
 }
 
 const headers = {
