@@ -30,6 +30,9 @@ function solve(body) {
   if(!body.scraps) {
     body.scraps = scraps.map(v => Object.assign({}, v));
   }
+  if(!body.options.edges) {
+    body.options.edges = {dx: 0, dy: 0};
+  }
   return execute(body);
 }
 
@@ -46,7 +49,7 @@ function listener (req, res) {
   }
   // проверка ip
   const ip = `${req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || res.socket.remoteAddress}`;
-  
+
   const ping = setInterval(() => {
     if(res.finished) {
       return clearInterval(ping);
