@@ -30,10 +30,13 @@ function solve(body) {
   if(!body.scraps) {
     body.scraps = scraps.map(v => Object.assign({}, v));
   }
+  if(!body.options) {
+    body.options = {};
+  }
   if(!body.options.edges) {
     body.options.edges = {dx: 0, dy: 0};
   }
-  return execute(body);
+  return execute(body.products, body.scraps, body.options);
 }
 
 const headers = {

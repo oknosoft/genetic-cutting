@@ -113,7 +113,7 @@ module.exports = {
     });
   },
 
-  prepare({products, scraps, options}, tmpPath) {
+  prepare(products, scraps, options, tmpPath) {
     if (!products.length || !scraps.length) {
       throw new Error('Пустой список изделий или заготовок');
     }
@@ -166,7 +166,7 @@ module.exports = {
   },
 
   // извлекает результат раскроя
-  extract({products, scraps, options}, tmpPath) {
+  extract(products, scraps, options, tmpPath) {
     const res = {scrapsIn: scraps, scrapsOut: [], products: []};
     const scrapIds = new Map();
     const findScrapIn = (stick) => {
