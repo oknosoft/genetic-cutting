@@ -12,7 +12,7 @@ module.exports = {
       let data = '';
       req.on('data', (chunk) => data += chunk);
       req.on('end', () => {
-        if(data.length > 0 && data.charCodeAt(0) == 65279) {
+        if(data.length > 0 && data.charCodeAt(0) === 65279) {
           data = data.substring(1);
         }
         resolve(data);
@@ -137,7 +137,7 @@ module.exports = {
       });
   },
 
-  // анализирует файлы с ошибкам
+  // анализирует файлы с ошибками
   errors(tmpPath) {
     return new Promise((resolve, reject) => {
       // если существует FILE.LOG - это ошибка и её содержимое надо вернуть в reject
@@ -179,38 +179,17 @@ module.exports = {
       }
       const row = Object.assign({}, scraps.find(v => v.stick === stick));
       scraps.push(row);
-      row.id = scraps.length;
+      row.id = scraps.reduce((sum, curr) => Math.max(sum, curr.id), 0) + 1;
       row.quantity = 1;
       return row;
     }
 
     return this.errors(tmpPath)
-      .then(() => this.read(join(tmpPath, 'OTHOD.DAT')))
-      .then(decode)
-      .then((data) => {
-        const rows = data.split('\r\n');
-        rows.forEach((row, index) => {
-          if(rows[index]) {
-            const flat = row.trim().split('\t').map(v => parseFloat(v));
-            const scrap = {
-              id: flat[0],
-              x: flat[1],
-              y: flat[2],
-              length: flat[3],
-              height: flat[4],
-              rotate: flat[5],
-            }
-            if((scrap.length > 480 && scrap.height > 360) || (scrap.length > 360 && scrap.height > 480)) {
-              res.scrapsOut.push(scrap);
-            }
-          }
-        });
-      })
       .then(() => this.read(join(tmpPath, 'RASKREND.DAT')))
       .then(decode)
       .then((data) => {
         const rows = data.split('Раскpой ');
-        rows.forEach((row, index) => {
+        rows.forEach((row) => {
           const tmp = row.trim().split('\r\n')
             .map(v => v.includes('\t') ? v.split('\t').map(v => parseFloat(v)) : parseFloat(v));
           if(tmp.length > 5) {
@@ -255,14 +234,35 @@ module.exports = {
         if(products.reduce((sum, curr) => sum + curr.quantity, 0) !== res.products.length) {
           throw new Error('Раскрой2D - не удалось разместить все изделия на заготовках');
         }
-
-        return this.read(join(tmpPath, 'REZ.DAT'));
       })
+      .then(() => this.read(join(tmpPath, 'OTHOD.DAT')))
+      .then(decode)
+      .then((data) => {
+        const rows = data.split('\r\n');
+        rows.forEach((row, index) => {
+          if(rows[index]) {
+            const flat = row.trim().split('\t').map(v => parseFloat(v));
+            const scrap = {
+              id: flat[0],
+              x: flat[1],
+              y: flat[2],
+              length: flat[3],
+              height: flat[4],
+              rotate: flat[5],
+            }
+            if((scrap.length > 480 && scrap.height > 360) || (scrap.length > 360 && scrap.height > 480)) {
+              scrap.id = scrapIds.get(scrap.id);
+              res.scrapsOut.push(scrap);
+            }
+          }
+        });
+      })
+      .then(() => this.read(join(tmpPath, 'REZ.DAT')))
       .then(decode)
       .then((data) => {
         const rows = data.split('Раскpой ');
         res.rez = [];
-        rows.forEach((row, index) => {
+        rows.forEach((row) => {
           const tmp = row.trim().split('\r\n')
             .map(v => v.includes('\t') ? v.split('\t').map(v => parseFloat(v)) : parseFloat(v));
           if(tmp.length > 1) {
