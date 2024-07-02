@@ -31,18 +31,9 @@ const cutAttr = {
 
 module.exports = function wrapper(EditorInvisible) {
   
-  const editor = new EditorInvisible();
-  const {Path, PointText, project} = editor;
-  
-  function rectangle(product, scrap) {
-    return new Path.Rectangle(
-      product.x,
-      scrap.height - product.y,
-      product.height,
-      -product.length);
-  }
-  
   return function svg(data) {
+    const editor = new EditorInvisible();
+    const {Path, PointText, project} = editor;
     const {scrapsIn, scrapsOut, products, options} = data;
     if(!scrapsIn) {
       throw new Error(data.message || JSON.stringify(data));
@@ -110,6 +101,7 @@ module.exports = function wrapper(EditorInvisible) {
       
       scrap.svg = getSvg.call(project, options);
     }
+    editor.unload();
     return data;
   };  
 }
