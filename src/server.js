@@ -16,7 +16,7 @@ module.exports = function cutting($p, log) {
   const svg = require('./svg')(EditorInvisible);
   const proxy = require('./proxy')($p);
   
-  return function listener (req, res) {
+  return function cuttingListener (req, res) {
     if(req.method !== 'POST') {
       res.writeHead(400);
       return res.end('only POST allowed');
@@ -50,3 +50,5 @@ module.exports = function cutting($p, log) {
       });
   }
 };
+
+module.exports.headers = headers;
