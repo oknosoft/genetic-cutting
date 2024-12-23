@@ -2,9 +2,28 @@
 const scale_svg = require('./scale_svg');
 
 function getSvg(options) {
-
-  const bounds = this.activeLayer.bounds;
-  const svg = this.exportSVG({precision: 1});
+  
+  const {_scope: {document}, activeLayer: {bounds}} = this;
+  const svg = this.exportSVG({
+    precision: 1,
+    onExport: (item, node) => {
+      if (item._class === 'PointText') {
+        node.textContent = null;
+        for (let i = 0; i < item._lines.length; i++) {
+          let tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+          tspan.textContent = `\u200b${item._lines[i]}`;
+          let dy = item.leading;
+          if (i === 0) {
+            dy = 0;
+          }
+          tspan.setAttributeNS(null, 'x', node.getAttribute('x'));
+          tspan.setAttributeNS(null, 'dy', dy);
+          node.appendChild(tspan);
+        }
+      }
+      return node;
+    }
+  });
 
   svg.setAttribute('x', bounds.x.round() - 40);
   svg.setAttribute('y', bounds.y.round() - 20);
@@ -15,7 +34,7 @@ function getSvg(options) {
   return options?.scale ? scale_svg(svg.outerHTML, options.scale.size, options.scale.padding) : svg.outerHTML;
 }
 
-const fontSize = 90;
+const fontSize = 70;
 
 const pathAttr = {
   strokeColor: 'black',
@@ -68,10 +87,11 @@ module.exports = function wrapper(EditorInvisible) {
         text.position = bounds.leftCenter.add([text.bounds.width/2 + 8, 0]);
         if(product.info) {
           text = new PointText({
+            point: bounds.center,
             content: product.info,
-            fontSize: fontSize * 1.3,
+            justification: 'center',
+            fontSize: fontSize * 0.8,             
           });
-          text.position = bounds.center;
         }
       }
 

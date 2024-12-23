@@ -5,7 +5,7 @@
   "author": "Evgeniy Malyarov <info@oknosoft.ru> (http://www.oknosoft.ru)",
   "license": "SEE LICENSE IN LICENSE.md",
   "engines": {
-    "node": ">=20.2",
+    "node": ">=20.11",
     "yarn": "^1.22"
   },
   "dependencies": {},
@@ -15,5 +15,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/oknosoft/genetic-cutting.git"
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }
