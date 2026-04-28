@@ -133,7 +133,7 @@ module.exports = {
           }
         });
         return this.write(join(tmpPath, 'LIST.CFG'), list)
-          .then(() => this.write(join(tmpPath, 'OTHOD.THN'), othod));
+          .then(() => this.write(join(tmpPath, 'OTHOD.THN'), Buffer.from(othod)));
       });
   },
 
@@ -189,10 +189,12 @@ module.exports = {
       .then(decode)
       .then((data) => {
         const rows = data.split('Раскpой ');
-        rows.forEach((row) => {
+        const splitted = {};
+        rows.forEach((row, i) => {
           const tmp = row.trim().split('\r\n')
             .map(v => v.includes('\t') ? v.split('\t').map(v => parseFloat(v)) : parseFloat(v));
-          if(tmp.length > 5) {
+          splitted[`r${i}`] = tmp;
+          if(tmp.length >= 5) {
             const flat = tmp[2];
             if(flat[3] !== 1) {
               throw new Error('Раскрой2D - число заготовок в RASKREND !== 1');
@@ -231,8 +233,11 @@ module.exports = {
             }
           }
         });
-        if(products.reduce((sum, curr) => sum + curr.quantity, 0) !== res.products.length) {
-          throw new Error('Раскрой2D - не удалось разместить все изделия на заготовках');
+        const taskLength = products.reduce((sum, curr) => sum + curr.quantity, 0);
+        if(taskLength !== res.products.length) {
+          throw new Error(`Раскрой2D - не удалось разместить все изделия на заготовках
+          ${taskLength} !== ${res.products.length}
+          ${JSON.stringify(splitted, null, '\t')}`);
         }
       })
       .then(() => this.read(join(tmpPath, 'OTHOD.DAT')))
