@@ -123,7 +123,14 @@ module.exports = {
     }
     return this.write(join(tmpPath, 'ZAG.CFG'), zag)
       .then(() => {
-        let list = `${options.edges.dx} ${options.edges.dy}\n0\n10\t480\t360\n`;
+        let list = `${options.edges.dx} ${options.edges.dy}`;
+        if(options.edges.dx1) {
+          list += ' ' + options.edges.dx1;
+        }
+        if(options.edges.dy1) {
+          list += ' ' + options.edges.dy1;
+        }
+        list += '\n0\n10\t480\t360\n';
         let othod = new Uint8Array(scraps.length);
         scraps.forEach((scrap, index) => {
           scrap.id = 0;
