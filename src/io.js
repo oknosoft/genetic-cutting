@@ -119,7 +119,7 @@ module.exports = {
     }
     let zag = `\n\n`;
     for (const product of products) {
-      zag += `${product.length}\t${product.height}\t${product.quantity || 1}\t+\n`;
+      zag += `${product.length}\t${product.height}\t${product.quantity || 1}\t${options.rotate === false ? '-' : '+'}\n`;
     }
     return this.write(join(tmpPath, 'ZAG.CFG'), zag)
       .then(() => {
