@@ -37,7 +37,7 @@ function getSvg(options) {
 const fontSize = 70;
 
 const pathAttr = {
-  strokeColor: 'black',
+  strokeColor: 'grey',
   strokeWidth: 1,
   strokeScaling: false,
 };
@@ -46,6 +46,12 @@ const cutAttr = {
   strokeWidth: 1,
   strokeScaling: false,
   dashArray: [6, 8],
+}
+const boundsAttr = {
+  strokeColor: 'green',
+  strokeWidth: 1,
+  strokeScaling: false,
+  dashArray: [3, 4],
 }
 
 module.exports = function wrapper(EditorInvisible) {
@@ -63,35 +69,68 @@ module.exports = function wrapper(EditorInvisible) {
       project.clear();
       project.activeLayer.removeChildren();
       const path = new Path.Rectangle(-0.5, -0.5 - dy, scrap.length + 1 + dx /2, scrap.height + 1 + dy /2);
-      path.set(Object.assign({}, pathAttr, {strokeWidth: 2}));
+      path.set({...pathAttr, strokeWidth: 1.5});
 
       scrap.products = products.filter(v => v.stick === scrap.id);
+      const bids = new Set();
       for(const product of scrap.products) {
-        const path = new Path.Rectangle(
-          product.x + dx,
-          scrap.height - product.y - dy,
-          product.height,
-          -product.length);
-        path.set(pathAttr);
-        const {bounds} = path;
-        let text = new PointText({
-          content: product.height.toFixed(),
-          fontSize,
-        });
-        text.position = bounds.bottomCenter.add([0, -text.bounds.height/2]);
-        text = new PointText({
-          content: product.length.toFixed(),
-          rotation: -90,
-          fontSize,
-        });
-        text.position = bounds.leftCenter.add([text.bounds.width/2 + 8, 0]);
-        if(product.info) {
-          text = new PointText({
-            point: bounds.center,
-            content: product.info,
-            justification: 'center',
-            fontSize: fontSize * 0.8,             
+        if(product.dop?.segments) {
+          const {bounds, segments} = product.dop;
+          if(!bids.has(bounds.id)) {
+            bids.add(bounds.id);
+            const path = new Path.Rectangle(
+              bounds.x + dx,
+              scrap.height - bounds.y - dy,
+              bounds.length,
+              -bounds.height
+            );
+            path.set(boundsAttr);
+          }
+          const path = new Path({
+            ...pathAttr,
+            segments: segments.map(([x, y]) => ({
+              x: x + dx,
+              y: scrap.height - y - dy,
+            })),
           });
+          path.closePath();
+          if(product.info) {
+            const {bounds} = path;
+            text = new PointText({
+              point: bounds.center,
+              content: product.info,
+              justification: 'center',
+              fontSize: fontSize * 0.8,
+            });
+          }
+        }
+        else {
+          const path = new Path.Rectangle(
+            product.x + dx,
+            scrap.height - product.y - dy,
+            product.height,
+            -product.length);
+          path.set(pathAttr);
+          const {bounds} = path;
+          let text = new PointText({
+            content: product.height.toFixed(),
+            fontSize,
+          });
+          text.position = bounds.bottomCenter.add([0, -text.bounds.height/2]);
+          text = new PointText({
+            content: product.length.toFixed(),
+            rotation: -90,
+            fontSize,
+          });
+          text.position = bounds.leftCenter.add([text.bounds.width/2 + 8, 0]);
+          if(product.info) {
+            text = new PointText({
+              point: bounds.center,
+              content: product.info,
+              justification: 'center',
+              fontSize: fontSize * 0.8,
+            });
+          }
         }
       }
 
